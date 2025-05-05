@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String    @id @default(uuid())
+  firstName          String
+  lastName           String
+  email              String    @unique
+  password           String // Hashed password
+  isAdmin            Boolean   @default(true)
+  cloudinaryPublicId String?   @map("cloudinary_public_id")
+  avatarImage        String?   @map("avatar_image") // Image URL stored as string (e.g. from Supabase Storage)
+  sessions           Session[]
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model Session {
+  id           String    @id @default(uuid())
+  userId       String
+  accessToken  String    @unique
+  refreshToken String    @unique
+  createdAt    DateTime  @default(now())
+  expiresAt    DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Photo {
+  id            String    @id @default(uuid())
+  title         String
+  description   String?
+  location      String?
+  imageUrl      String? // Image URL stored as string (e.g. from Supabase Storage)
+  photoPublicId String?   @map("photo_public_id")
+  date          DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("photos")
+}
+
+model Contact {
+  id          String   @id @default(uuid())
+  firstName   String
+  lastName    String
+  email       String
+  companyName String
+  phone       String
+  message     String
+  createdAt   DateTime @default(now())
+  updateAt    DateTime @updatedAt
+
+  @@map("contacts")
+}

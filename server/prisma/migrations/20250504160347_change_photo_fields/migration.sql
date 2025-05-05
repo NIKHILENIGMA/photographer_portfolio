@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "photos" ALTER COLUMN "location" DROP NOT NULL,
+ALTER COLUMN "imageUrl" DROP NOT NULL,
+ALTER COLUMN "date" DROP NOT NULL;
