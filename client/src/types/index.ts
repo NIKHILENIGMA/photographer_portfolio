@@ -36,3 +36,15 @@ export interface UpdatePhoto {
   location?: string;
   date?: Date;
 }
+
+export interface IContactDetails {
+  id: string,
+  firstName: string,
+  lastName: string,
+  email: string,
+  companyName: string,
+  phone: string,
+  message: string,
+  createdAt: string,
+  updateAt: string,
+}
