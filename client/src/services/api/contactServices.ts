@@ -40,6 +40,7 @@ export const getContacts = async () => {
             headers: {
                 "Content-Type": "application/json",
             },
+            credentials: "include",
         });
 
         if (!response.ok) {
@@ -62,6 +63,7 @@ export const deleteContact = async (id: string) => {
             headers: {
                 "Content-Type": "application/json",
             },
+            credentials: "include",
         });
 
         if (!response.ok) {
