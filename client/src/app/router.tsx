@@ -1,7 +1,8 @@
 import { RouterProvider, createBrowserRouter } from "react-router";
 import Main from "../layout";
 import * as Pages from "../pages";
-import ProtectedRoutes from "../components/Common/ProtectedRoutes";
+// import ProtectedRoutes from "../components/Common/ProtectedRoutes";
+import AdminLayout from "@/layout/AdminLayout";
 
 const router = createBrowserRouter([
   {
@@ -24,7 +25,6 @@ const router = createBrowserRouter([
         path: "gallery",
         element: <Pages.GalleryPage />,
       },
-
       {
         path: "*",
         element: <Pages.NotFoundPage />,
@@ -34,10 +34,24 @@ const router = createBrowserRouter([
   {
     path: "admin",
     element: (
-      <ProtectedRoutes>
-        <Pages.AdminPanel />
-      </ProtectedRoutes>
+      // <ProtectedRoutes>
+      // </ProtectedRoutes>
+        <AdminLayout />
     ),
+    children: [
+      {
+        path: "dashboard",
+        element: <Pages.DashboardPage />,
+      },
+      {
+        path: "contact-management",
+        element: <Pages.ContactManagementPage />,
+      },
+      {
+        path: "photo-management",
+        element: <Pages.PhotoManagementPage />,
+      },
+    ],
   },
   {
     path: "login",

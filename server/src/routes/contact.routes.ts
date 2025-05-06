@@ -4,15 +4,17 @@ import { isAuthenticated } from "../middleware/isAuthenticated.middleware";
 
 const router = Router();
 
-router.use(isAuthenticated);
-
 // Add contact details
 router.route("/add-contact").post(ContactController.createContact);
 // Delete contact details
-router.route("/:contactId").delete(ContactController.deleteContact);
+router
+  .route("/:contactId")
+  .delete(isAuthenticated, ContactController.deleteContact);
 // Get contact details
-router.route("/:contactId").get(ContactController.getContactDetails);
+router
+  .route("/:contactId")
+  .get(isAuthenticated, ContactController.getContactDetails);
 // Get contacts
-router.route("/").get(ContactController.getAllContacts);
+router.route("/").get(isAuthenticated, ContactController.getAllContacts);
 
 export default router;
