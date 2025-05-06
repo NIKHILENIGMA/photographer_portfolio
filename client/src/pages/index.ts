@@ -6,6 +6,9 @@ import GalleryPage from "./PublicPages/GalleryPage";
 import AdminPanel from "./AdminPages/AdminPanel";
 import LoginPage from "./AuthPages/LoginPage";
 import SignupPage from "./AuthPages/SignupPage";
+import DashboardPage from "./AdminPages/DashboardPage";
+import ContactManagementPage from "./AdminPages/ContactManagementPage";
+import PhotoManagementPage from "./AdminPages/PhotoManagementPage";
 
 export {
   HomePage,
@@ -16,4 +19,7 @@ export {
   SignupPage,
   GalleryPage,
   AdminPanel,
+  DashboardPage,
+  ContactManagementPage,
+  PhotoManagementPage,
 };
