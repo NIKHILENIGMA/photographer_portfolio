@@ -1,34 +1,57 @@
 import { FC } from "react";
+import { useContactQuery } from "./../../hooks/useContactQuery";
+import { Loader } from "lucide-react";
+import { IContactDetails } from "@/types";
+import { Button } from "../ui/button";
+import { FaRegTrashAlt } from "react-icons/fa";
+import { useContactMutation } from "@/hooks/useContantMutation";
 
-const ContactDetails:FC = () => {
-  
+const ContactDetails: FC = () => {
+  const { contacts, isPending } = useContactQuery();
+  const { deleteContactMutation } = useContactMutation();
+
+  const handleDeleteContact = async (id: string) => {
+    await deleteContactMutation.mutateAsync(id);
+  };
 
   return (
-    <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
+    <div className="my-8 bg-(--background) p-6 rounded-lg shadow-sm  min-h-[10vh]">
       <h2 className="text-2xl font-bold mb-4">Recent Activity</h2>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between border-b pb-4">
-          <div>
-            <p className="font-semibold">New user registration</p>
-            <p className="text-sm text-gray-500">john.doe@example.com</p>
-          </div>
-          <span className="text-sm text-gray-500">2 minutes ago</span>
+      {isPending ? (
+        <Loader />
+      ) : (
+        <div className="space-y-4">
+          {contacts?.data?.length > 0 ? (
+            contacts?.data?.map((contact: IContactDetails) => (
+              <div
+                key={contact.id}
+                className="flex items-center justify-between border-b pb-4"
+              >
+                <div>
+                  <p className="font-semibold">
+                    {contact.firstName} {contact.lastName}
+                  </p>
+                  <p className="text-sm text-gray-500">{contact.email}</p>
+                </div>
+                <span className="text-sm text-gray-500">
+                  {new Date(contact.createdAt).toLocaleString()}
+                </span>
+                <Button
+                  variant="outline"
+                  className="ml-4"
+                  onClick={() => handleDeleteContact(contact.id)}
+                >
+                  <FaRegTrashAlt />
+                </Button>
+              </div>
+            ))
+          ) : (
+            <div className="flex justify-center items-center ">
+              <p className="text-lg">No contacts found</p>
+            </div>
+          )}
         </div>
-        <div className="flex items-center justify-between border-b pb-4">
-          <div>
-            <p className="font-semibold">Photo upload</p>
-            <p className="text-sm text-gray-500">vacation_2023.jpg</p>
-          </div>
-          <span className="text-sm text-gray-500">15 minutes ago</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="font-semibold">Contact form submission</p>
-            <p className="text-sm text-gray-500">Support inquiry</p>
-          </div>
-          <span className="text-sm text-gray-500">1 hour ago</span>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
