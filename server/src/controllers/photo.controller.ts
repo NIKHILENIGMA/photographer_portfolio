@@ -11,15 +11,19 @@ import { removeFromCloudinary } from "../util/Cloudinary";
 export class PhotoController {
   static async addImageToPhoto(req: AppRequest, res: Response) {
     try {
+      const userId = req.user!.id; // Get the user ID from the request
+
       const photoFile = req.file as Express.Multer.File; // Assuming the image is sent in the request body
+
       if (!photoFile) {
         throw new ApiError("Image not found", 400);
-    }
-      
+      }
+
       const validateData = addPhotoSchema.parse(req.body); // Validate the request body
 
       const successMessage: string = await PhotoService.addImageToPhoto(
         photoFile.path,
+        userId,
         validateData
       );
 
@@ -44,18 +48,18 @@ export class PhotoController {
 
   static async updatePhoto(req: AppRequest, res: Response) {
     try {
-      const photoId: string  = req.params.photoId;
+      const photoId: string = req.params.photoId;
       const photoFile = req.file as Express.Multer.File; // Assuming the image is sent in the request body
       if (!photoFile) {
         throw new ApiError("Image not found", 400);
       }
 
-
       const validateData = updatePhotoSchema.parse(req.body);
 
       const successMessgae = await PhotoService.updatePhoto(
         photoId,
-        validateData
+        validateData,
+        photoFile.path
       );
 
       res.status(200).json(ApiResponse.successResponse(successMessgae, 200));
