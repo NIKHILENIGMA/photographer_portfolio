@@ -14,8 +14,7 @@ export class PhotoController {
       const photoFile = req.file as Express.Multer.File; // Assuming the image is sent in the request body
       if (!photoFile) {
         throw new ApiError("Image not found", 400);
-      }
-      console.log("req.body", req.body, );
+    }
       
       const validateData = addPhotoSchema.parse(req.body); // Validate the request body
 
@@ -45,7 +44,7 @@ export class PhotoController {
 
   static async updatePhoto(req: AppRequest, res: Response) {
     try {
-      const { photoId } = req.params;
+      const photoId: string  = req.params.photoId;
       const photoFile = req.file as Express.Multer.File; // Assuming the image is sent in the request body
       if (!photoFile) {
         throw new ApiError("Image not found", 400);

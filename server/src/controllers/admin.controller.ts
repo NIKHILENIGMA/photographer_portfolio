@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { ApiError, ApiResponse } from "../util";
 import { removeFromCloudinary, uploadOnCloudinary } from "../util/Cloudinary";
-import { PublishPhoto } from "../types";
+// import { PublishPhoto } from "../types";
 import { AppRequest } from "../types/app-request";
 import { AdminService } from "../services/admin.service";
 import {
@@ -82,21 +82,22 @@ export class AdminController {
     }
   }
 
-  static async addAvatar(req: AppRequest, res: Response) {
+  public static async addAvatar(req: AppRequest, res: Response) {
     try {
       const user = req.user;
+
       if (!user) {
         throw new ApiError("Unauthorized User", 401);
       }
       const userId = user.id;
-
       const avatarFile = req.file as Express.Multer.File;
+      const avatarFilePath: string = avatarFile?.path;
 
-      if (!avatarFile) {
-        throw new ApiError("No file uploaded", 400);
+      if (!avatarFilePath) {
+        throw new ApiError("File is not available", 400);
       }
 
-      const avatarUrl = await uploadOnCloudinary(avatarFile.path, {
+      const avatarUrl = await uploadOnCloudinary(avatarFilePath, {
         folder: "avatars",
         overwrite: true,
       });

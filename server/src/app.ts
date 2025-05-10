@@ -1,22 +1,27 @@
 import express, { Response } from "express";
 import cors from "cors";
+import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import { GlobalErrorHandler, NotFound } from "./util";
 
 const app = express();
+const corsOptions = {
+  origin: 'http://localhost:5173',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Accept-Encoding', ],
 
+  credentials: true // This must be true
+};
+
+app.use(cors(corsOptions));
+app.use(helmet())
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ limit: "5mb", extended: true }));
 app.use(express.static("public"));
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
 app.use(cookieParser());
+// app.options('*', cors(corsOptions)); // Handle preflight requests
+
+
 
 import adminRoutes from "./routes/admin.routes";
 import authRoutes from "./routes/auth.routes";
