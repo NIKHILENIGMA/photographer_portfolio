@@ -3,6 +3,8 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
+  avatarImage: string;
+  createdAt: string;
 }
 
 export interface AuthContextType {
@@ -12,7 +14,6 @@ export interface AuthContextType {
   setToken: (token: string | null) => void; // Allow token to be null
   loading: boolean;
 }
-
 
 export interface LoginPayload {
   email: string;
@@ -38,13 +39,13 @@ export interface UpdatePhoto {
 }
 
 export interface IContactDetails {
-  id: string,
-  firstName: string,
-  lastName: string,
-  email: string,
-  companyName: string,
-  phone: string,
-  message: string,
-  createdAt: string,
-  updateAt: string,
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  companyName: string;
+  phone: string;
+  message: string;
+  createdAt: string;
+  updateAt: string;
 }
