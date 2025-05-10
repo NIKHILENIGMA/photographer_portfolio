@@ -37,7 +37,7 @@ export const useLogin = () => {
 
     setToken(token);
 
-    navigate("/admin", { replace: true });
+    navigate("/admin/dashboard/", { replace: true });
   };
 
   const loginMutation = useMutation({

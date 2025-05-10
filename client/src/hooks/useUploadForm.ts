@@ -35,6 +35,14 @@ export const useUploadForm = () => {
     }
   };
 
+  const handleFileRemove = () => {
+    setPreview("");
+    setSelectedFile(null);
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
+  }
+
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -83,6 +91,7 @@ export const useUploadForm = () => {
     preview,
     formDetails,
     handleImageChange,
+    handleFileRemove,
     handleInputChange,
     handleFormSubmit,
   };
