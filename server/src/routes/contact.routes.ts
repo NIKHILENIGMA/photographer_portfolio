@@ -1,20 +1,18 @@
-import { Router } from "express";
+import express from "express";
 import { ContactController } from "../controllers/contact.controller";
 import { isAuthenticated } from "../middleware/isAuthenticated.middleware";
 
-const router = Router();
+const router = express.Router();
 
-// Add contact details
-router.route("/add-contact").post(ContactController.createContact);
-// Delete contact details
-router
-  .route("/:contactId")
-  .delete(isAuthenticated, ContactController.deleteContact);
-// Get contact details
-router
-  .route("/:contactId")
-  .get(isAuthenticated, ContactController.getContactDetails);
-// Get contacts
-router.route("/").get(isAuthenticated, ContactController.getAllContacts);
+router.use(isAuthenticated);
+
+// Create and get contacts
+router.post("/add", ContactController.createContact);
+router.get("/", ContactController.getAllContacts);
+
+// Individual contact actions
+router.route("/:contactId")
+  .get(ContactController.getContactDetails)
+  .delete(ContactController.deleteContact);
 
 export default router;

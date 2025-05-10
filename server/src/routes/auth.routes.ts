@@ -1,27 +1,16 @@
-import { Router } from "express";
+import express from "express";
 import { AuthenticationController } from "../controllers/auth.controller";
 import { isAuthenticated } from "../middleware/isAuthenticated.middleware";
 
-const router = Router();
+const router = express.Router();
 
-// Signup
-router.route("/signup").post(AuthenticationController.signup);
-// Login
-router.route("/login").post(AuthenticationController.login);
+// Sign up, login, logout
+router.post("/signup", AuthenticationController.signup);
+router.post("/login", AuthenticationController.login);
+router.delete("/logout", AuthenticationController.logout);
 
-// logout
-router.route("/logout").post(AuthenticationController.logout);
-// Reset Password
-// todo: add reset password route
-
-// Refresh Token
-router
-  .route("/refresh-token")
-  .post(isAuthenticated, AuthenticationController.refreshToken);
-
-// Get User Profile
-router
-  .route("/profile")
-  .get(isAuthenticated, AuthenticationController.getProfile);
+// Token and profile
+router.post("/refresh-token", isAuthenticated, AuthenticationController.refreshToken);
+router.get("/profile", isAuthenticated, AuthenticationController.getProfile);
 
 export default router;
