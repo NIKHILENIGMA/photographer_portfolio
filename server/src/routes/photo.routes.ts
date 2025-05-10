@@ -1,17 +1,18 @@
 import express from "express";
+import { upload } from "../middleware";
 import { PhotoController } from "../controllers/photo.controller";
 import { isAuthenticated } from "../middleware/isAuthenticated.middleware";
-import { upload } from "../middleware/multer.middleware";
 
 const router = express.Router();
 
 // Upload new image
-router.post(
-  "/add-image",
-  isAuthenticated,
-  upload.single("photo"),
-  PhotoController.addImageToPhoto
-);
+router
+  .route("/add-image")
+  .post(
+    isAuthenticated,
+    upload.single("photo"),
+    PhotoController.addImageToPhoto
+  );
 
 // Fetch all photos
 router.get("/", PhotoController.getPhotos);
@@ -20,7 +21,7 @@ router.get("/", PhotoController.getPhotos);
 router
   .route("/:photoId")
   .get(PhotoController.getPhotoDetails)
-  .patch(isAuthenticated, PhotoController.updatePhoto)
+  .patch(isAuthenticated, upload.single("photo"), PhotoController.updatePhoto)
   .delete(isAuthenticated, PhotoController.deletePhoto);
 
 export default router;
