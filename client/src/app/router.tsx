@@ -3,6 +3,7 @@ import Main from "../layout";
 import * as Pages from "../pages";
 // import ProtectedRoutes from "../components/Common/ProtectedRoutes";
 import AdminLayout from "@/layout/AdminLayout";
+import ProtectedRoutes from "@/components/Common/ProtectedRoutes";
 
 const router = createBrowserRouter([
   {
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
         element: <Pages.GalleryPage />,
       },
       {
+        path: "testing",
+        element: <Pages.TestingPage />,
+      },
+      {
         path: "*",
         element: <Pages.NotFoundPage />,
       },
@@ -34,9 +39,9 @@ const router = createBrowserRouter([
   {
     path: "admin",
     element: (
-      // <ProtectedRoutes>
-      // </ProtectedRoutes>
+      <ProtectedRoutes>
         <AdminLayout />
+      </ProtectedRoutes>
     ),
     children: [
       {
@@ -50,6 +55,10 @@ const router = createBrowserRouter([
       {
         path: "photo-management",
         element: <Pages.PhotoManagementPage />,
+      },
+      {
+        path: "photo-management/:photoId",
+        element: <Pages.PhotoDetailPage />,
       },
     ],
   },
