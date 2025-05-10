@@ -1,7 +1,15 @@
 import { AUTHENTICATION_URL } from "../../app/constants";
 import { AuthResponse, LoginPayload, RegisterPayload, User } from "../../types";
 
-const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api/v1";
+const API_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api/v1";
+
+interface GetUserResponse {
+  success: boolean;
+  message: string;
+  data: User;
+  statusCode: number;
+}
 
 class AuthService {
   private static instance: AuthService;
@@ -47,7 +55,7 @@ class AuthService {
       });
 
       const data = await response.json();
-      
+
       this.setToken(data.data.accessToken);
       return data;
     } catch (error) {
@@ -56,13 +64,14 @@ class AuthService {
     }
   }
 
-  async getProfile(token: string): Promise<User> {
+  async getProfile(token: string): Promise<GetUserResponse> {
     try {
       const response = await fetch(`${API_URL}/${AUTHENTICATION_URL}/profile`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
       });
 
       if (!response.ok) {
@@ -78,12 +87,13 @@ class AuthService {
 
   async register(payload: RegisterPayload): Promise<AuthResponse> {
     try {
-      const response = await fetch(`/${AUTHENTICATION_URL}/signup`, {
+      const response = await fetch(`${API_URL}/${AUTHENTICATION_URL}/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
+        credentials: "include",
       });
 
       if (!response.ok) {
@@ -99,7 +109,7 @@ class AuthService {
 
   async refreshToken(): Promise<AuthResponse> {
     try {
-      const response = await fetch(`/${AUTHENTICATION_URL}/refresh`, {
+      const response = await fetch(`${API_URL}/${AUTHENTICATION_URL}/refresh`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -121,13 +131,15 @@ class AuthService {
 
   async logout(): Promise<void> {
     try {
-      const response = await fetch(`/${AUTHENTICATION_URL}/logout`, {
+      const response = await fetch(`${API_URL}/${AUTHENTICATION_URL}/logout`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${this.getToken()}`,
         },
+        credentials: "include",
       });
-
+      console.log('response', response);
+      
       if (!response.ok) {
         throw new Error("Failed to logout");
       }
