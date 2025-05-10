@@ -9,7 +9,6 @@ import SignupPage from "./AuthPages/SignupPage";
 import DashboardPage from "./AdminPages/DashboardPage";
 import ContactManagementPage from "./AdminPages/ContactManagementPage";
 import PhotoManagementPage from "./AdminPages/PhotoManagementPage";
-import TestingPage from "./PublicPages/TestingPage";
 import PhotoDetailPage from "./AdminPages/PhotoDetailPage";
 
 export {
@@ -24,6 +23,5 @@ export {
   DashboardPage,
   ContactManagementPage,
   PhotoManagementPage,
-  TestingPage,
   PhotoDetailPage,
 };

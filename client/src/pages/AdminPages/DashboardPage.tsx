@@ -112,7 +112,7 @@ export default function Dashboard(): JSX.Element {
                 <DialogHeader>
                   <DialogTitle>Avatar</DialogTitle>
                   <DialogDescription>Add your avatar image.</DialogDescription>
-                  <div className="flex flex-col bg-amber-300 space-y-4 items-center w-full justify-center p-10">
+                  <div className="flex flex-col space-y-4 items-center w-full justify-center p-10">
                     {user && user.avatarImage ? (
                       <div className="flex flex-col items-center p-3 space-y-5">
                         <img
