@@ -27,10 +27,6 @@ const router = createBrowserRouter([
         element: <Pages.GalleryPage />,
       },
       {
-        path: "testing",
-        element: <Pages.TestingPage />,
-      },
-      {
         path: "*",
         element: <Pages.NotFoundPage />,
       },
