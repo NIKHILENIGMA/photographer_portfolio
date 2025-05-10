@@ -5,6 +5,7 @@ import { unlinkSync } from "node:fs";
 interface CloudinaryOptions {
   folder?: string; // Optional: specify a folder in Cloudinary
   overwrite?: boolean; // Optional: overwrite existing image with the same public ID
+  public_id?: string;
 }
 
 /**
@@ -34,6 +35,7 @@ export const uploadOnCloudinary = async (
     const response = await cloudinary.uploader.upload(localPath, {
       folder: options.folder, // Optional: specify a folder in Cloudinary
       overwrite: options.overwrite, // Optional: overwrite existing image with the same public ID
+      public_id: options.public_id, // Optional: specify a public ID for the image
     });
 
     unlinkSync(localPath); // Delete the local file after uploading
