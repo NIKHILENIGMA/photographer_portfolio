@@ -7,25 +7,31 @@ import { getFullPath } from "../util/getFullPath";
 export class PhotoService {
   static async addImageToPhoto(
     imagePath: string,
+    userId: string,
     addPhotoData: addPhotoData
   ): Promise<string> {
     try {
-      const photoUrl: string = await uploadOnCloudinary(imagePath, {
+      //  Generate a unique public ID for the image
+      const publicId: string = `photo_${userId}_${Date.now()}`;
+      
+      // Upload the image to Cloudinary
+      const url: string = await uploadOnCloudinary(imagePath, {
         folder: "photos",
         overwrite: true,
-      }); // Upload image to Cloudinary
+        public_id: publicId, // Generate a unique public ID
+      });
 
-      const fullPath = getFullPath(photoUrl); // Get the full path of the image
-
+      // Update the database with the image details
       await prisma.photo.create({
         data: {
           title: addPhotoData.title,
           description: addPhotoData.description,
-          imageUrl: photoUrl,
-          photoPublicId: fullPath, // Assuming 'photoPublicId' is the field to update
+          imageUrl: url,
+          photoPublicId: publicId,
         },
       });
 
+      // Get the full path of the image
       return "Image added successfully";
     } catch (error) {
       if (error instanceof Error) {
@@ -40,12 +46,22 @@ export class PhotoService {
 
   static async updatePhoto(
     photoId: string,
-    payload: updatePhotoData
+    payload: updatePhotoData,
+    newFilePath?: string
   ): Promise<string> {
-    const photo = this.getPhotoByPhotoId(photoId); // Check if the photo exists
+    const photo = await this.getPhotoByPhotoId(photoId)!; // Check if the photo exists
 
     if (!photo) {
       throw new Error("Photo not found");
+    }
+
+    if (newFilePath) {
+      const newPhotoUrl: string = await uploadOnCloudinary(newFilePath, {
+        folder: "photos",
+        overwrite: true,
+        public_id: photo?.photoPublicId || "", // Use the existing public ID to overwrite
+      });
+      payload.imageUrl = newPhotoUrl;
     }
 
     await prisma.photo.update({
