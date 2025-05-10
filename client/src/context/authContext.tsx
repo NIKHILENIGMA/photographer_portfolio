@@ -12,7 +12,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const fetchUser = async () => {
       try {
         const userData = await AuthService.getProfile(token as string);
-        setUser(userData);
+        setUser(userData.data);
       } catch (error) {
         setUser(null);
         setToken(null);
