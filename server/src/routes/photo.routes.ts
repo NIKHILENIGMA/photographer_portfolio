@@ -5,6 +5,12 @@ import { isAuthenticated } from "../middleware/isAuthenticated.middleware";
 
 const router = express.Router();
 
+// Public routes
+// Fetch all photos
+router.get("/", PhotoController.getPhotos);
+
+
+// Protected routes
 // Upload new image
 router
   .route("/add-image")
@@ -14,8 +20,6 @@ router
     PhotoController.addImageToPhoto
   );
 
-// Fetch all photos
-router.get("/", PhotoController.getPhotos);
 
 // Photo CRUD by ID
 router

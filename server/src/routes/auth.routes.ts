@@ -4,13 +4,19 @@ import { isAuthenticated } from "../middleware/isAuthenticated.middleware";
 
 const router = express.Router();
 
+// Public routes
 // Sign up, login, logout
 router.post("/signup", AuthenticationController.signup);
 router.post("/login", AuthenticationController.login);
-router.delete("/logout", AuthenticationController.logout);
 
+// Protected routes
 // Token and profile
-router.post("/refresh-token", isAuthenticated, AuthenticationController.refreshToken);
+router.delete("/logout", isAuthenticated, AuthenticationController.logout);
+router.post(
+    "/refresh-token",
+    isAuthenticated,
+    AuthenticationController.refreshToken
+);
 router.get("/profile", isAuthenticated, AuthenticationController.getProfile);
 
 export default router;
