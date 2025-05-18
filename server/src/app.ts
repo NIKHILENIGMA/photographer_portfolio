@@ -6,22 +6,25 @@ import { GlobalErrorHandler, NotFound } from "./util";
 
 const app = express();
 const corsOptions = {
-  origin: 'http://localhost:5173',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Accept-Encoding', ],
+  origin: "http://localhost:5173",
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "Accept",
+    "Accept-Encoding",
+  ],
 
-  credentials: true // This must be true
+  credentials: true, // This must be true
 };
 
 app.use(cors(corsOptions));
-app.use(helmet())
+app.use(helmet());
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ limit: "5mb", extended: true }));
 app.use(express.static("public"));
 app.use(cookieParser());
 // app.options('*', cors(corsOptions)); // Handle preflight requests
-
-
 
 import adminRoutes from "./routes/admin.routes";
 import authRoutes from "./routes/auth.routes";
@@ -33,7 +36,7 @@ app.use("/api/v1/authentication", authRoutes);
 app.use("/api/v1/photos", photoRoutes);
 app.use("/api/v1/contacts", contactRoutes);
 
-app.use(NotFound)
+app.use(NotFound);
 app.use(GlobalErrorHandler.handleError); // Global error handler
 
 app.get("/health", (_, res: Response) => {
