@@ -1,9 +1,15 @@
 import { Request, Response } from "express";
-import { ApiError, ApiResponse } from "../util";
+import {
+  ApiResponse,
+  DatabaseError,
+  InternalServerError,
+  NotFoundError,
+  StandardError,
+  UnauthorizedError,
+} from "../util";
 import { AuthenticationServices } from "../services/auth.service";
 import { loginSchema, signupSchema } from "../validators/auth.validators";
 import { z } from "zod";
-import { AppRequest } from "../types/app-request";
 import { Authenticated } from "../types/base.types";
 
 export class AuthenticationController {
@@ -16,26 +22,24 @@ export class AuthenticationController {
       );
 
       if (!successMessage) {
-        throw new ApiError("Service failed to register", 403);
+        throw new DatabaseError("Failed to register user");
       }
 
-      res
-        .status(200)
-        .json(ApiResponse.successResponse(successMessage, {}, 201));
+      ApiResponse(req, res, 201, "User registered successfully", {
+        message: successMessage,
+      });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        throw new ApiError(error.errors.map((e) => e.message).join(", "), 400);
-      } else if (error instanceof Error) {
-        const errMessage = error.message;
-
-        if (errMessage.includes("already exist")) {
-          throw new ApiError(errMessage, 409);
-        } else if (errMessage.includes("Failed to register")) {
-          throw new ApiError(errMessage, 400);
-        }
+        throw error;
       }
 
-      throw new ApiError("An unexpected error occurred while signup", 500);
+      if (error instanceof StandardError) {
+        throw error;
+      }
+
+      throw new InternalServerError(
+        "An unexpected error occurred while registering user"
+      );
     }
   }
 
@@ -46,7 +50,9 @@ export class AuthenticationController {
       const tokens = await AuthenticationServices.login(validateData);
 
       if (!tokens) {
-        throw new ApiError("Invalid email or password", 401);
+        throw new DatabaseError(
+          "Failed to login, please check your credentials"
+        );
       }
 
       res.cookie("access_token", tokens.accessToken, {
@@ -61,27 +67,30 @@ export class AuthenticationController {
         sameSite: "strict",
       });
 
-      res
-        .status(200)
-        .json(
-          ApiResponse.successResponse("User login successfully", tokens, 200)
-        );
+      ApiResponse(req, res, 200, "User logged in successfully", {
+        access_token: tokens.accessToken,
+        refresh_token: tokens.refreshToken,
+      });
     } catch (error) {
-      if (error instanceof Error) {
-        throw new ApiError(error.message, 500);
+      if (error instanceof StandardError) {
+        throw error;
       }
 
-      throw new ApiError("An unexpected error occurred while login", 500);
+      throw new InternalServerError("An unexpected error occurred while login");
     }
   }
 
-  static async logout(req: AppRequest, res: Response) {
+  static async logout(req: Request, res: Response) {
     try {
-      const userId = req.user?.id; // Get user ID from the request object
-      const { refresh_token } = req.cookies;
+      const userId: string | undefined = req.user?.id; // Get user ID from the request object
+      if (!userId) {
+        throw new UnauthorizedError("User not authenticated");
+      }
 
+      
+      const { refresh_token } = req.cookies as Authenticated;
       if (!refresh_token) {
-        throw new ApiError("No refresh token provided", 401);
+        throw new NotFoundError("No refresh token provided");
       }
 
       await AuthenticationServices.logout(userId, refresh_token);
@@ -100,15 +109,17 @@ export class AuthenticationController {
         maxAge: 1000 * 60 * 60 * 24 * 5, // 5 days
       });
 
-      res
-        .status(200)
-        .json(ApiResponse.successResponse("User logged out", {}, 200));
+      ApiResponse(req, res, 200, "User logged out successfully", {
+        message: "User logged out successfully",
+      });
     } catch (error) {
-      if (error instanceof Error) {
-        throw new ApiError(error.message, 500);
+      if (error instanceof StandardError) {
+        throw error;
       }
 
-      throw new ApiError("An unexpected error occurred while logout", 500);
+      throw new InternalServerError(
+        "An unexpected error occurred while logout"
+      );
     }
   }
 
@@ -117,40 +128,36 @@ export class AuthenticationController {
     try {
       // Logic for resetting password
     } catch (error) {
-      if (error instanceof Error) {
-        throw new ApiError(error.message, 500);
+      if (error instanceof StandardError) {
+        throw error;
       }
 
-      throw new ApiError(
-        "An unexpected error occurred while resetting password",
-        500
+      throw new InternalServerError(
+        "An unexpected error occurred while resetting password"
       );
     }
   }
 
-  static async refreshToken(req: AppRequest, res: Response) {
+  static async refreshToken(req: Request, res: Response) {
     try {
       const tokens = req.cookies as Authenticated;
-      const userId = req.user?.id; // Get user ID from the request object
+      const userId: string | undefined = req.user?.id; // Get user ID from the request object
+      if (!userId) {
+        throw new UnauthorizedError("User not authenticated");
+      }
 
       // If the access token is present in the cookies, return it
       if (tokens.access_token) {
-        res
-          .status(200)
-          .json(
-            ApiResponse.successResponse(
-              "Token refreshed successfully",
-              tokens,
-              200
-            )
-          );
+        ApiResponse(req, res, 200, "Access token is valid", {
+          access_token: tokens.access_token,
+        });
 
         return;
       }
 
       // If the refresh token is present in the cookies, use it to refresh the access token
       if (!tokens.refresh_token) {
-        throw new ApiError("No refresh token provided", 401);
+        throw new NotFoundError("No refresh token provided");
       }
 
       const newTokens = await AuthenticationServices.refreshToken(
@@ -159,7 +166,9 @@ export class AuthenticationController {
       );
 
       if (!newTokens) {
-        throw new ApiError("Failed to refresh token", 401);
+        throw new DatabaseError(
+          "Failed to refresh token, please check your credentials"
+        );
       }
 
       res.cookie("access_token", newTokens.accessToken, {
@@ -174,35 +183,37 @@ export class AuthenticationController {
         sameSite: "strict",
       });
 
-      res
-        .status(200)
-        .json(
-          ApiResponse.successResponse(
-            "Token refreshed successfully",
-            tokens,
-            200
-          )
-        );
+      ApiResponse(req, res, 200, "Token refreshed successfully", {
+        access_token: newTokens.accessToken,
+        refresh_token: newTokens.refreshToken,
+      });
     } catch (error) {
-      if (error instanceof Error) {
-        throw new ApiError(error.message, 500);
+      if (error instanceof StandardError) {
+        throw error;
       }
 
-      throw new ApiError(
-        "An unexpected error occurred while refreshing token",
-        500
+      throw new InternalServerError(
+        "An unexpected error occurred while refreshing token"
       );
     }
   }
 
-  static getProfile(req: AppRequest, res: Response) {
+  static getProfile(req: Request, res: Response) {
     const user = req.user; // Get user ID from the request object
     if (!user) {
-      throw new ApiError("User not found", 404);
+      throw new UnauthorizedError("User not authenticated");
     }
 
-    res
-      .status(200)
-      .json(ApiResponse.successResponse("User profile", user, 200));
+    ApiResponse(req, res, 200, "User profile retrieved successfully", {
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profilePicture: user.avatarImage,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      },
+    });
   }
 }

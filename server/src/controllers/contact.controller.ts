@@ -1,7 +1,12 @@
 import { Request, Response } from "express";
 import { ContactService } from "../services/contact.service";
 import { contactSchema } from "../validators/contact.validator";
-import { ApiResponse, ApiError } from "../util";
+import {
+  ApiResponse,
+  DatabaseError,
+  InternalServerError,
+  StandardError,
+} from "../util";
 
 export class ContactController {
   static async createContact(req: Request, res: Response) {
@@ -10,20 +15,35 @@ export class ContactController {
 
       const message = await ContactService.createContact(validated);
 
-      res.status(201).json(ApiResponse.successResponse(message, {}, 201));
+      ApiResponse(req, res, 201, "Contact message sent successfully", {});
     } catch (error) {
-      ContactController.handleError(error, "Error saving contact message");
+      if (error instanceof StandardError) {
+        throw error;
+      }
+
+      throw new InternalServerError(
+        "An unexpected error occurred while creating contact"
+      );
     }
   }
 
   static async getAllContacts(req: Request, res: Response) {
     try {
       const contacts = await ContactService.getAllContacts();
-      res
-        .status(200)
-        .json(ApiResponse.successResponse("Contacts fetched", contacts, 200));
+      if (!contacts) {
+        throw new DatabaseError("No contacts found");
+      }
+      ApiResponse(req, res, 200, "Contacts fetched successfully", {
+        contacts,
+      });
     } catch (error) {
-      ContactController.handleError(error, "Error fetching contacts");
+      if (error instanceof StandardError) {
+        throw error;
+      }
+
+      throw new InternalServerError(
+        "An unexpected error occurred while fetching contacts"
+      );
     }
   }
 
@@ -33,11 +53,17 @@ export class ContactController {
 
       const contact = await ContactService.getContactDetails(contactId);
 
-      res
-        .status(200)
-        .json(ApiResponse.successResponse("Contact fetched", contact, 200));
+      ApiResponse(req, res, 200, "Contact details fetched successfully", {
+        contact,
+      });
     } catch (error) {
-      ContactController.handleError(error, "Error fetching contact details");
+      if (error instanceof StandardError) {
+        throw error;
+      }
+
+      throw new InternalServerError(
+        "An unexpected error occurred while fetching contact details"
+      );
     }
   }
 
@@ -47,20 +73,15 @@ export class ContactController {
 
       const message = await ContactService.deleteContact(contactId);
 
-      res.status(200).json(ApiResponse.successResponse(message, 200));
+      ApiResponse(req, res, 200, "Contact deleted successfully", {});
     } catch (error) {
-      ContactController.handleError(error, "Error deleting contact");
-    }
-  }
-
-  private static handleError(error: unknown, fallback: string) {
-    if (error instanceof Error) {
-      if (error.message.includes("not found")) {
-        throw new ApiError(error.message, 404);
+      if (error instanceof StandardError) {
+        throw error;
       }
-      throw new ApiError(error.message, 500);
-    }
 
-    throw new ApiError(fallback, 500, error);
+      throw new InternalServerError(
+        "An unexpected error occurred while deleting contact"
+      );
+    }
   }
 }

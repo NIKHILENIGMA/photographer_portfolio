@@ -1,8 +1,13 @@
 import { Request, Response } from "express";
-import { ApiError, ApiResponse } from "../util";
+import {
+  ApiResponse,
+  DatabaseError,
+  InternalServerError,
+  NotFoundError,
+  StandardError,
+  UnauthorizedError,
+} from "../util";
 import { removeFromCloudinary, uploadOnCloudinary } from "../util/Cloudinary";
-// import { PublishPhoto } from "../types";
-import { AppRequest } from "../types/app-request";
 import { AdminService } from "../services/admin.service";
 import {
   changePasswordSchema,
@@ -10,11 +15,11 @@ import {
 } from "../validators/admin.validator";
 
 export class AdminController {
-  static async updateProfile(req: AppRequest, res: Response) {
+  static async updateProfile(req: Request, res: Response) {
     try {
       const user = req.user;
       if (!user) {
-        throw new ApiError("Unauthorized User", 401);
+        throw new UnauthorizedError("Unauthorized User");
       }
       const userId = user.id;
       const validateData = updateProfileSchema.parse(req.body);
@@ -26,31 +31,28 @@ export class AdminController {
       );
 
       if (!updatedUser) {
-        throw new ApiError("Failed to update profile", 500);
+        throw new DatabaseError("Failed to update profile");
       }
 
-      res
-        .status(200)
-        .json(
-          ApiResponse.successResponse("Profile updated successfully", {}, 200)
-        );
+      ApiResponse(req, res, 200, "Profile updated successfully", {
+        user: updatedUser,
+      });
     } catch (error) {
-      if (error instanceof Error) {
-        throw new ApiError(error.message, 500);
+      if (error instanceof StandardError) {
+        throw error;
       }
 
-      throw new ApiError(
-        "An unexpected error occurred while updating profile",
-        500
+      throw new InternalServerError(
+        "An unexpected error occurred while updating profile"
       );
     }
   }
 
-  static async changePassword(req: AppRequest, res: Response) {
+  static async changePassword(req: Request, res: Response) {
     try {
       const user = req.user;
       if (!user) {
-        throw new ApiError("Unauthorized User", 401);
+        throw new UnauthorizedError("Unauthorized User");
       }
       const userId = user.id;
 
@@ -62,39 +64,36 @@ export class AdminController {
       });
 
       if (!updatedUser) {
-        throw new ApiError("Failed to update password", 500);
+        throw new DatabaseError("Failed to update password");
       }
 
-      res
-        .status(200)
-        .json(
-          ApiResponse.successResponse("Password updated successfully", {}, 200)
-        );
+      ApiResponse(req, res, 200, "Password updated successfully", {
+        user: updatedUser,
+      });
     } catch (error) {
-      if (error instanceof Error) {
-        throw new ApiError(error.message, 500);
+      if (error instanceof StandardError) {
+        throw error;
       }
 
-      throw new ApiError(
-        "An unexpected error occurred while updating password",
-        500
+      throw new InternalServerError(
+        "An unexpected error occurred while updating password"
       );
     }
   }
 
-  public static async addAvatar(req: AppRequest, res: Response) {
+  public static async addAvatar(req: Request, res: Response) {
     try {
       const user = req.user;
 
       if (!user) {
-        throw new ApiError("Unauthorized User", 401);
+        throw new UnauthorizedError("Unauthorized User");
       }
       const userId = user.id;
       const avatarFile = req.file as Express.Multer.File;
       const avatarFilePath: string = avatarFile?.path;
 
       if (!avatarFilePath) {
-        throw new ApiError("File is not available", 400);
+        throw new NotFoundError("File is not available");
       }
 
       const avatarUrl = await uploadOnCloudinary(avatarFilePath, {
@@ -103,38 +102,35 @@ export class AdminController {
       });
 
       if (!avatarUrl) {
-        throw new ApiError("Failed to upload image on cloudinary", 500);
+        throw new InternalServerError("Failed to upload avatar to Cloudinary");
       }
 
       // Update the user's avatar in the database
       const updatedUser = await AdminService.addAvatar(userId, avatarUrl);
 
       if (!updatedUser) {
-        throw new ApiError("Failed to update profile", 500);
+        throw new DatabaseError("Failed to update avatar");
       }
 
-      res
-        .status(200)
-        .json(
-          ApiResponse.successResponse("Avatar added successfully", {}, 200)
-        );
+      ApiResponse(req, res, 200, "Avatar added successfully", {
+        user: updatedUser,
+      });
     } catch (error) {
-      if (error instanceof Error) {
-        throw new ApiError(error.message, 500);
+      if (error instanceof StandardError) {
+        throw error;
       }
 
-      throw new ApiError(
-        "An unexpected error occurred while adding avatar",
-        500
+      throw new InternalServerError(
+        "An unexpected error occurred while adding avatar"
       );
     }
   }
 
-  static async removeAvatar(req: AppRequest, res: Response) {
+  static async removeAvatar(req: Request, res: Response) {
     try {
       const user = req.user;
       if (!user) {
-        throw new ApiError("Unauthorized User", 401);
+        throw new UnauthorizedError("Unauthorized User");
       }
       const userId: string = user.id;
 
@@ -142,7 +138,7 @@ export class AdminController {
       const public_id: string = await AdminService.findPublicId(userId);
 
       if (!public_id) {
-        throw new ApiError("Public ID not found", 404);
+        throw new NotFoundError("Public ID not found");
       }
 
       await removeFromCloudinary(public_id);
@@ -151,57 +147,45 @@ export class AdminController {
       const removedAvatar = await AdminService.removeAvatar(userId);
 
       if (!removedAvatar) {
-        throw new ApiError("Failed to remove avatar", 500);
+        throw new DatabaseError("Failed to remove avatar");
       }
 
       res
         .status(200)
-        .json(
-          ApiResponse.successResponse("Avatar removed successfully", {}, 200)
-        );
+        .json(ApiResponse(req, res, 200, "Avatar removed successfully", {}));
     } catch (error) {
-      if (error instanceof Error) {
-        throw new ApiError(error.message, 500);
+      if (error instanceof StandardError) {
+        throw error;
       }
 
-      throw new ApiError(
-        "An unexpected error occurred while removing avatar",
-        500
+      throw new InternalServerError(
+        "An unexpected error occurred while removing avatar"
       );
     }
   }
 
-  static async getProfile(req: AppRequest, res: Response) {
+  static async getProfile(req: Request, res: Response) {
     try {
       const user = req.user;
       if (!user) {
-        throw new ApiError("Unauthorized User", 401);
+        throw new UnauthorizedError("Unauthorized User");
       }
 
       const userId = user.id;
       const userProfile = await AdminService.findUserById(userId);
 
       if (!userProfile) {
-        throw new ApiError("User not found", 404);
+        throw new NotFoundError("User not found");
       }
 
-      res
-        .status(200)
-        .json(
-          ApiResponse.successResponse(
-            "User profile fetched successfully",
-            { user: userProfile },
-            200
-          )
-        );
+      ApiResponse(req, res, 200, "User profile fetched successfully", {});
     } catch (error) {
-      if (error instanceof Error) {
-        throw new ApiError(error.message, 500);
+      if (error instanceof StandardError) {
+        throw error;
       }
 
-      throw new ApiError(
-        "An unexpected error occurred while fetching profile",
-        500
+      throw new InternalServerError(
+        "An unexpected error occurred while fetching profile"
       );
     }
   }
