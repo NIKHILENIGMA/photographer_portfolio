@@ -49,3 +49,19 @@ export interface IContactDetails {
   createdAt: string;
   updateAt: string;
 }
+
+export interface AddFormDetails {
+  photo?: File;
+  title: string;
+  description: string;
+  location?: string;
+  date?: Date | null;
+}
+
+export interface UpdateFormDetails {
+  photo?: File | null;
+  title?: string;
+  description?: string;
+  location?: string;
+  date?: Date | null;
+}
