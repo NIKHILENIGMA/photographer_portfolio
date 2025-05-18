@@ -1,6 +1,13 @@
-import { Request } from "express";
-import { User } from "../../generated/prisma";
+import { User } from '@prisma/client';
+import * as express from 'express';
 
-export interface AppRequest extends Request {
-    user?: User;
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: User
+      file?: Express.Multer.File;
+      files?: Express.Multer.File[];
+    }
+  }
 }
