@@ -1,5 +1,4 @@
 import { FC, useState } from "react";
-import { usePhotoQuery } from "@/hooks/usePhoto";
 import Loader from "@/components/Common/Loader";
 import {
   Dialog,
@@ -8,6 +7,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { usePhotosQuery } from "@/hooks/usePhotos";
 
 interface Images {
   id: string;
@@ -22,9 +22,7 @@ interface Images {
 }
 
 const GalleryPage: FC = () => {
-  const { photosQuery } = usePhotoQuery();
-  const { data: photos, isPending, isError } = photosQuery;
-
+  const { photos, isLoading, isError } = usePhotosQuery();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogData, setDialogData] = useState<{
     imageUrl: string;
@@ -34,7 +32,7 @@ const GalleryPage: FC = () => {
 
   return (
     <div className="w-full min-h-screen p-2 sm:p-5 mx-auto bg-[var(--background)] relative">
-      {isPending ? (
+      {isLoading ? (
         <Loader />
       ) : isError ? (
         <div className="flex justify-center items-center min-h-screen">

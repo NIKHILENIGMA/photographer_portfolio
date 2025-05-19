@@ -21,3 +21,13 @@ export enum EApplicationEnvironment {
     DEVELOPMENT = 'development',
     PRODUCTION = 'production',
 }
+
+export type User = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  cloudinaryPublicId: string | null;
+  avatarImage: string | null;
+  createdAt: Date;
+};

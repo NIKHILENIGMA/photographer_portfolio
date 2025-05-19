@@ -1,5 +1,5 @@
 import { prisma } from "../config";
-import { updateProfileData } from "../types/base.types";
+import { updateProfileData, User } from "../types/base.types";
 import { getFullPath } from "../util/getFullPath";
 import { hashPassword } from "../util/hash";
 
@@ -49,7 +49,7 @@ export class AdminService {
     });
   }
 
-  static async findUserById(id: string) {
+  static async findUserById(id: string): Promise<User | null> {
     return await prisma.user.findUnique({
       where: { id },
       select: {
@@ -57,9 +57,10 @@ export class AdminService {
         firstName: true,
         lastName: true,
         email: true,
+        cloudinaryPublicId: true,
         avatarImage: true,
         createdAt: true,
-      }
+      },
     });
   }
 

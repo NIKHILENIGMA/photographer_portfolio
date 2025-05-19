@@ -12,9 +12,10 @@ import {
 } from "../validators/photo.validator";
 import { PhotoService } from "../services/photo.service";
 import { removeFromCloudinary } from "../util/Cloudinary";
+import { CustomRequest } from "../app-request";
 
 export class PhotoController {
-  static async addImageToPhoto(req: Request, res: Response) {
+  static async addImageToPhoto(req: CustomRequest, res: Response) {
     try {
       const userId = req.user!.id; // Get the user ID from the request
 
@@ -48,10 +49,10 @@ export class PhotoController {
     }
   }
 
-  static async updatePhoto(req: Request, res: Response) {
+  static async updatePhoto(req: CustomRequest, res: Response) {
     try {
       const photoId: string = req.params.photoId;
-      const photoFile = req.file as Express.Multer.File; // Assuming the image is sent in the request body
+      const photoFile = req.file as Express.Multer.File; // Assuming the image is sent in the CustomRequest body
       if (!photoFile) {
         throw new NotFoundError("File not found");
       }
@@ -76,7 +77,7 @@ export class PhotoController {
     }
   }
 
-  static async deletePhoto(req: Request, res: Response) {
+  static async deletePhoto(req: CustomRequest, res: Response) {
     try {
       const { photoId } = req.params;
 

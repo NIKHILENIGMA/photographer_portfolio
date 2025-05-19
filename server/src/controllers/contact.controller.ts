@@ -12,10 +12,10 @@ export class ContactController {
   static async createContact(req: Request, res: Response) {
     try {
       const validated = contactSchema.parse(req.body);
+      
+      const message: string = await ContactService.createContact(validated);
 
-      const message = await ContactService.createContact(validated);
-
-      ApiResponse(req, res, 201, "Contact message sent successfully", {});
+      ApiResponse(req, res, 201, message, {});
     } catch (error) {
       if (error instanceof StandardError) {
         throw error;

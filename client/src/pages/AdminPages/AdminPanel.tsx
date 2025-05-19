@@ -1,31 +1,31 @@
 import { FC } from "react";
 import { Stats, ContactDetails } from "../../components";
-import { usePhotoQuery } from "../../hooks/usePhoto";
-import { IoPencil } from "react-icons/io5";
-import { FaRegTrashAlt } from "react-icons/fa";
-import { usePhotoMutation } from "../../hooks/usePhotoMutation";
+// import { usePhotoQuery } from "../../hooks/usePhotos";
+// import { IoPencil } from "react-icons/io5";
+// import { FaRegTrashAlt } from "react-icons/fa";
+// import { usePhotoMutation } from "../../hooks/usePhotoMutation";
 import UploadForm from "./../../components/Common/UploadForm";
 
-interface IPhoto {
-  id: string;
-  title: string;
-  description: string;
-  location: string | null;
-  imageUrl: string;
-  photoPublicId: string;
-  date: string;
-  createdAt: string;
-  updatedAt: string;
-}
+// interface IPhoto {
+//   id: string;
+//   title: string;
+//   description: string;
+//   location: string | null;
+//   imageUrl: string;
+//   photoPublicId: string;
+//   date: string;
+//   createdAt: string;
+//   updatedAt: string;
+// }
 
 const AdminPanel: FC = () => {
-  const { photosQuery } = usePhotoQuery();
-  const { deletePhotoMutation } = usePhotoMutation();
-  const { data: photos, isPending } = photosQuery;
+  // const { photosQuery } = usePhotoQuery();
+  // const { deletePhotoMutation } = usePhotoMutation();
+  // const { data: photos, isPending } = photosQuery;
 
-  const handleDeletePhoto = async (id: string) => {
-    await deletePhotoMutation.mutateAsync(id);
-  };
+  // const handleDeletePhoto = async (id: string) => {
+  //   await deletePhotoMutation.mutateAsync(id);
+  // };
 
   return (
     <div className="w-full min-h-screen p-8">
@@ -36,7 +36,7 @@ const AdminPanel: FC = () => {
 
       <UploadForm />
       <div className="mt-2 p-2 min-h-[40vh] overflow-auto">
-        {isPending ? (
+        {/* {isPending ? (
           <div className="flex justify-center items-center min-h-screen">
             <p className="text-lg">Loading...</p>
           </div>
@@ -66,7 +66,7 @@ const AdminPanel: FC = () => {
               </div>
             ))}
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

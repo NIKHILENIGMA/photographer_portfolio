@@ -7,7 +7,7 @@ import {
 import queryClient from "../app/queryClient";
 import { UpdatePhoto } from "../types";
 
-interface FormDetails {
+export interface FormDetails {
   title: string;
   location?: string;
   date?: Date | null;
@@ -16,7 +16,7 @@ interface FormDetails {
 
 export const usePhotoMutation = () => {
   const addPhotoMutation = useMutation({
-    mutationFn: async ({ file, data }: { file: File; data: FormDetails }) =>
+    mutationFn: async ({ file, data }: { file: File; data: AddFormDetails }) =>
       await addPhoto(file, data),
     mutationKey: ["addPhoto"],
     onSuccess: () => {

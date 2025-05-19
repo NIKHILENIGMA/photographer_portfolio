@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, useCallback, useRef, useState } from "react";
 import { usePhotoMutation } from "./usePhotoMutation";
 
 interface FormDetails {
@@ -16,10 +16,19 @@ export const useUploadForm = () => {
   const [formDetails, setFormDetails] = useState<FormDetails | null>({
     title: "",
     location: "",
-    photographer: "",
     date: null,
     description: "",
   } as FormDetails);
+
+  // const getDate = useCallback(
+  //   (date: Date) => {
+  //     setFormDetails({
+  //       ...formDetails,
+  //       date: date,
+  //     } as FormDetails);
+  //   },
+  //   [formDetails]
+  // );
 
   const handleImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -41,26 +50,22 @@ export const useUploadForm = () => {
     if (inputRef.current) {
       inputRef.current.value = "";
     }
-  }
+  };
 
   const handleInputChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e:
+      | ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+      | { target: { name: string; value: Date | null } }
   ) => {
     const { name, value } = e.target;
-    if (name === "date") {
-      setFormDetails((prev) => ({
-        ...prev!,
-        date: value ? new Date(value) : null,
-      }));
-    } else {
-      setFormDetails(
-        (prevDetails) =>
-          ({
-            ...prevDetails,
-            [name]: value || null,
-          } as FormDetails)
-      );
-    }
+
+    setFormDetails(
+      (prevDetails) =>
+        ({
+          ...prevDetails,
+          [name]: value || null,
+        } as FormDetails)
+    );
   };
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -69,27 +74,30 @@ export const useUploadForm = () => {
     if (!formDetails) return;
 
     const { title, location, date, description } = formDetails;
+    console.log("Form Details:", formDetails);
 
     if (!title || !location || !date || !description) {
       alert("Please fill in all fields.");
       return;
     }
 
-    addPhotoMutation.mutate({ file: selectedFile!, data: formDetails });
-    setFormDetails({
-      title: "",
-      location: "",
-      date: null,
-      description: "",
-    });
-    setPreview("");
-    setSelectedFile(null);
+    // addPhotoMutation.mutate({ file: selectedFile!, data: formDetails });
+    // setFormDetails({
+    //   title: "",
+    //   location: "",
+    //   date: null,
+    //   description: "",
+    // });
+    // setPreview("");
+    // setSelectedFile(null);
   };
 
   return {
     inputRef,
     preview,
     formDetails,
+    setFormDetails,
+    getDate,
     handleImageChange,
     handleFileRemove,
     handleInputChange,

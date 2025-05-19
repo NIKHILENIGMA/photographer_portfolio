@@ -3,6 +3,7 @@ import { prisma } from "../config";
 import { loginData, SignupData } from "../types/base.types";
 import { comparePasswords, hashPassword } from "../util/hash";
 import { generateAccessToken, generatePayload } from "../util/JWT";
+import { ConflictError, DatabaseError, InternalServerError, StandardError } from "../util";
 
 export class AuthenticationServices {
   static async register(
@@ -15,11 +16,17 @@ export class AuthenticationServices {
       const existEmail: boolean = await this.verifyEmailExist(payload.email);
 
       if (existEmail) {
-        throw new Error("A user with this email is already registered");
+        throw new ConflictError("Email already exists");
       }
 
       const hashedPassword: string = await hashPassword(payload.password);
       payload.password = hashedPassword;
+
+      if (!hashPassword) {
+        throw new InternalServerError(
+          "Failed to hash password, please try again later"
+        );
+      }
 
       await prisma.user.create({
         data: {
@@ -29,11 +36,19 @@ export class AuthenticationServices {
         },
       });
 
+      console.log("User created successfully");
+
       return "User register successfully";
     } catch (error) {
-      if (error instanceof Error) {
-        throw Error(`Failed to register user: ${error?.message}`);
+      console.log("Error creating user:", error);
+      
+      if (error instanceof StandardError) {
+        throw error;
       }
+
+      throw new InternalServerError(
+        "An unexpected error occurred while registering user"
+      );
     }
   }
 
@@ -135,10 +150,14 @@ export class AuthenticationServices {
   }
 
   static async verifyEmailExist(email: string): Promise<boolean> {
-    const user = await prisma.user.findFirst({
-      where: { email },
-    });
-
-    return user ? true : false;
+    try {
+      const user = await prisma.user.findUnique({
+        where: { email },
+      });
+  
+      return user ? true : false;
+    } catch (error) {
+      throw new DatabaseError("Error while checking email existence");
+    }
   }
 }

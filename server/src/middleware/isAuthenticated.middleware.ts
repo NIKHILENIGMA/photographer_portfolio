@@ -1,9 +1,11 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Response } from "express";
 import { ACCESS_TOKEN_SECRET } from "../config/app.config";
 import { AdminService } from "../services/admin.service";
-import { ApiError } from "../util";
 import { verifyToken } from "../util/JWT";
-import { AppRequest } from "../types/app-request";
+import { BadRequestError, NotFoundError, StandardError, UnauthorizedError } from "../util";
+import { User } from "../types/base.types";
+import { CustomRequest } from "../app-request";
+
 
 function extractTokenFromHeader(header: string): string | null {
   if (!header || header === "") return null;
@@ -12,7 +14,7 @@ function extractTokenFromHeader(header: string): string | null {
 }
 
 export const isAuthenticated = async (
-  req: AppRequest,
+  req: CustomRequest,
   res: Response,
   next: NextFunction
 ) => {
@@ -25,29 +27,33 @@ export const isAuthenticated = async (
   }
 
   if (!accessToken) {
-    throw new ApiError("Authentication token is missing", 401);
+    throw new UnauthorizedError("No token provided in request");
   }
 
   try {
     const decoded = verifyToken(accessToken, ACCESS_TOKEN_SECRET);
-
     if (!decoded) {
-      throw new ApiError("Invalid token", 401);
+      throw new BadRequestError("Invalid token");
     }
+
 
     if (!decoded?.sub) {
-      throw new ApiError("Invalid token payload", 401);
-    }
-    const user = await AdminService.findUserById(decoded?.sub); // Ensure the user exists in the database
-
-    if (!user) {
-      throw new ApiError("User not found", 404);
+      throw new BadRequestError("Token does not contain user");
     }
 
-    req.user = user; // Attach the decoded token to the request object
+    const user: User | null = await AdminService.findUserById(decoded?.sub); // Ensure the user exists in the database
+    if (!user || user === null) {
+      throw new NotFoundError("User not found");
+    }
+    // Attach the user to the request object
+    req.user = user
 
     next(); // Proceed to the next middleware or route handler
   } catch (error) {
-    throw new ApiError("User is not authenticated!", 401);
+    if (error instanceof StandardError) {
+      throw error; // Re-throw known errors
+    }
+
+    throw new UnauthorizedError("Unauthorized access"); // Handle unknown errors
   }
 };

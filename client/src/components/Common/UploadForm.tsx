@@ -15,7 +15,6 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Trash2 } from "lucide-react";
-import { DatePicker } from "./DatePicker";
 
 const UploadForm: FC = () => {
   const {
@@ -128,7 +127,6 @@ const UploadForm: FC = () => {
                 <Label htmlFor="description" className=" font-medium mb-2">
                   Date
                 </Label>
-                <DatePicker />
                 <span className="text-gray-500 text-xs px-1">
                   Select the date when the image was taken.
                 </span>
@@ -156,7 +154,9 @@ const UploadForm: FC = () => {
               Upload
             </Button>
             <SheetClose asChild>
-              <Button variant={'outline'} type="submit">Cancel</Button>
+              <Button variant={"outline"} type="submit">
+                Cancel
+              </Button>
             </SheetClose>
           </SheetFooter>
         </form>
