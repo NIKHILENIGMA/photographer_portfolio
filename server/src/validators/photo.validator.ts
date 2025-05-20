@@ -13,6 +13,4 @@ export const updatePhotoSchema = z.object({
   description: z.string().min(1, "Description is required").optional(),
   location: z.string().optional(),
   date: z.coerce.date().optional(),
-  imageUrl: z.string().optional(),
-  photoPublicId: z.string().optional(),
 });
