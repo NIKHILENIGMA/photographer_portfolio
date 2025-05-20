@@ -15,6 +15,7 @@ import { removeFromCloudinary } from "../util/Cloudinary";
 import { CustomRequest } from "../app-request";
 
 export class PhotoController {
+  // ----------------------------------------- CREATE OPERATION ---------------------------------------------
   static async addImageToPhoto(req: CustomRequest, res: Response) {
     try {
       const userId = req.user!.id; // Get the user ID from the request
@@ -22,8 +23,9 @@ export class PhotoController {
       const photoFile = req.file as Express.Multer.File; // Assuming the image is sent in the request body
 
       if (!photoFile) {
-        throw new NotFoundError("File not found");
+        throw new NotFoundError("Local file not found in the request");
       }
+      console.log("Photo Date: ", req.body.date);
 
       const validateData = addPhotoSchema.parse(req.body); // Validate the request body
 
@@ -49,20 +51,16 @@ export class PhotoController {
     }
   }
 
-  static async updatePhoto(req: CustomRequest, res: Response) {
+  // --------------------------------------  UPDATE OPERATIONS ---------------------------------------------
+  static async updatePhotoDetails(req: CustomRequest, res: Response) {
     try {
       const photoId: string = req.params.photoId;
-      const photoFile = req.file as Express.Multer.File; // Assuming the image is sent in the CustomRequest body
-      if (!photoFile) {
-        throw new NotFoundError("File not found");
-      }
 
       const validateData = updatePhotoSchema.parse(req.body);
 
-      const successMessgae = await PhotoService.updatePhoto(
+      const successMessgae = await PhotoService.updatePhotoDetails(
         photoId,
-        validateData,
-        photoFile.path
+        validateData
       );
 
       ApiResponse(req, res, 200, successMessgae, {});
@@ -77,28 +75,37 @@ export class PhotoController {
     }
   }
 
-  static async deletePhoto(req: CustomRequest, res: Response) {
-    try {
-      const { photoId } = req.params;
-
-      const public_id: string = await PhotoService.findPublicId(photoId); // Find the public ID of the photo
-
-      await removeFromCloudinary(public_id);
-
-      const successMessgae = await PhotoService.deletePhoto(photoId);
-
-      ApiResponse(req, res, 200, successMessgae, {});
-    } catch (error) {
-      if (error instanceof StandardError) {
-        throw error;
-      }
-
-      throw new InternalServerError(
-        "An unexpected error occurred while deleting photo"
-      );
+  static async updateImageOfPhoto(req: CustomRequest, res: Response) {
+    const photoId: string = req.params.photoId;
+    const photoFile = req.file as Express.Multer.File; // Assuming the image is sent in the CustomRequest body
+    
+    if (!photoFile) {
+      throw new NotFoundError("File not found in the request");
     }
+
+    const successMessgae = await PhotoService.updateImage(
+      photoId,
+      photoFile.path
+    );
+
+    ApiResponse(req, res, 200, successMessgae, {});
   }
 
+  // ----------------------------------------- DELETE OPERATION ---------------------------------------------
+  static async deletePhoto(req: CustomRequest, res: Response) {
+    const { photoId } = req.params;
+
+    const public_id: string = await PhotoService.findPublicId(photoId); // Find the public ID of the photo
+
+    await removeFromCloudinary(public_id);
+
+    const successMessgae = await PhotoService.deletePhoto(photoId);
+
+    ApiResponse(req, res, 200, successMessgae, {});
+  }
+
+  // ------------------------------------------- READ OPERATIONS ---------------------------------------------
+  // Controller method to get photo details and photos
   static async getPhotoDetails(req: Request, res: Response) {
     try {
       const { photoId } = req.params;

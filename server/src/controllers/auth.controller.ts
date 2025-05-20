@@ -16,7 +16,6 @@ import { CustomRequest } from "../app-request";
 export class AuthenticationController {
   static async signup(req: Request, res: Response) {
     const validateData = signupSchema.parse(req.body);
-    console.log("validateData", validateData);
 
     const successMessage = await AuthenticationServices.register(validateData);
     if (!successMessage) {
