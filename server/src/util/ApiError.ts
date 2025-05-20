@@ -123,8 +123,12 @@ export class InternalServerError extends StandardError {
   }
 }
 
+/**
+ * Represents a 503 Service Unavailable error 
+ * Used when the server is currently unable to handle the request
+ */
 export class DatabaseError extends StandardError {
-  public StatusCode = 500;
+  public StatusCode = 503;
   constructor(public message: string, public field?: string) {
     super(message);
   }
