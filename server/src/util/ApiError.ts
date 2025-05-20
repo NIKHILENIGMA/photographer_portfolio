@@ -3,12 +3,12 @@
  * Extends the built-in Error class with additional HTTP status code and serialization capabilities
  */
 export abstract class StandardError extends Error {
-  constructor(public message: string) {
-    super(message);
-    Object.setPrototypeOf(this, new.target.prototype); // restore prototype chain
-  }
-  public abstract StatusCode: number;
-  public abstract serialize(): { message: string; field?: string }[];
+    constructor(public message: string) {
+        super(message)
+        Object.setPrototypeOf(this, new.target.prototype) // restore prototype chain
+    }
+    public abstract StatusCode: number
+    public abstract serialize(): { message: string; field?: string }[]
 }
 
 /**
@@ -16,13 +16,16 @@ export abstract class StandardError extends Error {
  * Used when the request cannot be processed due to client error
  */
 export class BadRequestError extends StandardError {
-  public StatusCode = 400;
-  constructor(public message: string, public field?: string) {
-    super(message);
-  }
-  public serialize() {
-    return [{ message: this.message, field: this.field }];
-  }
+    public StatusCode = 400
+    constructor(
+        public message: string,
+        public field?: string
+    ) {
+        super(message)
+    }
+    public serialize() {
+        return [{ message: this.message, field: this.field }]
+    }
 }
 
 /**
@@ -30,13 +33,16 @@ export class BadRequestError extends StandardError {
  * Used when authentication is required but has failed or not been provided
  */
 export class UnauthorizedError extends StandardError {
-  public StatusCode = 401;
-  constructor(public message: string, public field?: string) {
-    super(message);
-  }
-  public serialize() {
-    return [{ message: this.message, field: this.field }];
-  }
+    public StatusCode = 401
+    constructor(
+        public message: string,
+        public field?: string
+    ) {
+        super(message)
+    }
+    public serialize() {
+        return [{ message: this.message, field: this.field }]
+    }
 }
 
 /**
@@ -44,13 +50,16 @@ export class UnauthorizedError extends StandardError {
  * Used when the server understands the request but refuses to authorize it
  */
 export class ForbiddenError extends StandardError {
-  public StatusCode = 403;
-  constructor(public message: string, public field?: string) {
-    super(message);
-  }
-  public serialize() {
-    return [{ message: this.message, field: this.field }];
-  }
+    public StatusCode = 403
+    constructor(
+        public message: string,
+        public field?: string
+    ) {
+        super(message)
+    }
+    public serialize() {
+        return [{ message: this.message, field: this.field }]
+    }
 }
 
 /**
@@ -58,13 +67,16 @@ export class ForbiddenError extends StandardError {
  * Used when the requested resource could not be found
  */
 export class NotFoundError extends StandardError {
-  public StatusCode = 404;
-  constructor(public message: string, public field?: string) {
-    super(message);
-  }
-  public serialize() {
-    return [{ message: this.message, field: this.field }];
-  }
+    public StatusCode = 404
+    constructor(
+        public message: string,
+        public field?: string
+    ) {
+        super(message)
+    }
+    public serialize() {
+        return [{ message: this.message, field: this.field }]
+    }
 }
 
 /**
@@ -72,13 +84,16 @@ export class NotFoundError extends StandardError {
  * Used when the request conflicts with the current state of the server
  */
 export class ConflictError extends StandardError {
-  public StatusCode = 409;
-  constructor(public message: string, public field?: string) {
-    super(message);
-  }
-  public serialize() {
-    return [{ message: this.message, field: this.field }];
-  }
+    public StatusCode = 409
+    constructor(
+        public message: string,
+        public field?: string
+    ) {
+        super(message)
+    }
+    public serialize() {
+        return [{ message: this.message, field: this.field }]
+    }
 }
 
 /**
@@ -86,13 +101,13 @@ export class ConflictError extends StandardError {
  * Used when the request was well-formed but contains semantic errors
  */
 export class ValidationError extends StandardError {
-  public StatusCode = 422;
-  constructor(private errors: { message: string; field?: string }[]) {
-    super("Validation Error");
-  }
-  public serialize() {
-    return this.errors;
-  }
+    public StatusCode = 422
+    constructor(private errors: { message: string; field?: string }[]) {
+        super('Validation Error')
+    }
+    public serialize() {
+        return this.errors
+    }
 }
 
 /**
@@ -100,13 +115,16 @@ export class ValidationError extends StandardError {
  * Used when the user has sent too many requests in a given amount of time
  */
 export class TooManyRequestsError extends StandardError {
-  public StatusCode = 429;
-  constructor(public message: string, public field?: string) {
-    super(message);
-  }
-  public serialize() {
-    return [{ message: this.message, field: this.field }];
-  }
+    public StatusCode = 429
+    constructor(
+        public message: string,
+        public field?: string
+    ) {
+        super(message)
+    }
+    public serialize() {
+        return [{ message: this.message, field: this.field }]
+    }
 }
 
 /**
@@ -114,25 +132,31 @@ export class TooManyRequestsError extends StandardError {
  * Used when the server encounters an unexpected condition
  */
 export class InternalServerError extends StandardError {
-  public StatusCode = 500;
-  constructor(public message: string, public field?: string) {
-    super(message);
-  }
-  public serialize() {
-    return [{ message: this.message, field: this.field }];
-  }
+    public StatusCode = 500
+    constructor(
+        public message: string,
+        public field?: string
+    ) {
+        super(message)
+    }
+    public serialize() {
+        return [{ message: this.message, field: this.field }]
+    }
 }
 
 /**
- * Represents a 503 Service Unavailable error 
+ * Represents a 503 Service Unavailable error
  * Used when the server is currently unable to handle the request
  */
 export class DatabaseError extends StandardError {
-  public StatusCode = 503;
-  constructor(public message: string, public field?: string) {
-    super(message);
-  }
-  public serialize() {
-    return [{ message: this.message, field: this.field }];
-  }
+    public StatusCode = 503
+    constructor(
+        public message: string,
+        public field?: string
+    ) {
+        super(message)
+    }
+    public serialize() {
+        return [{ message: this.message, field: this.field }]
+    }
 }

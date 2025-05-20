@@ -1,3 +1,3 @@
-import { PublishPhoto } from "./base.types";
+import { PublishPhoto } from './base.types'
 
-export { PublishPhoto };
+export { PublishPhoto }
