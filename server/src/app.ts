@@ -2,7 +2,7 @@ import express, { Response } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
-import { GlobalErrorHandler, NotFound } from "./util";
+import { errorHandler, notFound } from "./middleware";
 
 const app = express();
 const corsOptions = {
@@ -36,8 +36,8 @@ app.use("/api/v1/authentication", authRoutes);
 app.use("/api/v1/photos", photoRoutes);
 app.use("/api/v1/contacts", contactRoutes);
 
-app.use(NotFound);
-app.use(GlobalErrorHandler.handleError); // Global error handler
+app.use(notFound);
+app.use(errorHandler); // Global error handler
 
 app.get("/health", (_, res: Response) => {
   res.status(200).json({ status: "ok" });
