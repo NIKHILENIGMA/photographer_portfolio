@@ -1,5 +1,4 @@
 import { ApiResponse } from "./ApiResponse";
-import GlobalErrorHandler from "./GlobalErrorHandler";
 import NotFound from "./NotFound";
 import {
   StandardError,
@@ -16,7 +15,6 @@ import {
 
 export {
   ApiResponse,
-  GlobalErrorHandler,
   NotFound,
   StandardError,
   BadRequestError,
