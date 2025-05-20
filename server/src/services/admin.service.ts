@@ -4,6 +4,15 @@ import { getFullPath } from "../util/getFullPath";
 import { hashPassword } from "../util/hash";
 
 export class AdminService {
+  private static readonly userObject = {
+    id: true,
+    firstName: true,
+    lastName: true,
+    email: true,
+    cloudinaryPublicId: true,
+    avatarImage: true,
+    createdAt: true,
+  }
   static async addAvatar(userId: string, avatarUrl: string) {
     const fullPath = getFullPath(avatarUrl);
 
@@ -52,15 +61,7 @@ export class AdminService {
   static async findUserById(id: string): Promise<User | null> {
     return await prisma.user.findUnique({
       where: { id },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        email: true,
-        cloudinaryPublicId: true,
-        avatarImage: true,
-        createdAt: true,
-      },
+      select: this.userObject,
     });
   }
 

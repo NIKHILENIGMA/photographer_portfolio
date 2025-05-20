@@ -3,7 +3,13 @@ import { prisma } from "../config";
 import { loginData, SignupData } from "../types/base.types";
 import { comparePasswords, hashPassword } from "../util/hash";
 import { generateAccessToken, generatePayload } from "../util/JWT";
-import { ConflictError, DatabaseError, InternalServerError, StandardError } from "../util";
+import {
+  BadRequestError,
+  ConflictError,
+  DatabaseError,
+  InternalServerError,
+  StandardError,
+} from "../util";
 
 export class AuthenticationServices {
   static async register(
@@ -13,7 +19,9 @@ export class AuthenticationServices {
       const adminStatus: boolean =
         payload.firstName === "Siddhesh" && payload.lastName === "Sawant";
 
-      const existEmail: boolean = await this.verifyEmailExist(payload.email);
+      const existEmail = await prisma.user.findUnique({
+        where: { email: payload.email },
+      });
 
       if (existEmail) {
         throw new ConflictError("Email already exists");
@@ -28,7 +36,7 @@ export class AuthenticationServices {
         );
       }
 
-      await prisma.user.create({
+      const user = await prisma.user.create({
         data: {
           ...payload,
           isAdmin: adminStatus,
@@ -36,19 +44,20 @@ export class AuthenticationServices {
         },
       });
 
-      console.log("User created successfully");
+      if (!user) {
+        throw new DatabaseError("Failed to create user");
+      }
 
       return "User register successfully";
     } catch (error) {
-      console.log("Error creating user:", error);
-      
       if (error instanceof StandardError) {
-        throw error;
+        error
       }
-
-      throw new InternalServerError(
-        "An unexpected error occurred while registering user"
-      );
+      if (error instanceof Error) {
+        throw new InternalServerError(
+          `An unexpected error occurred while registering user: ${error.message}`
+        );
+      }
     }
   }
 
@@ -60,13 +69,13 @@ export class AuthenticationServices {
       });
 
       if (!user) {
-        throw new Error("User not found");
+        throw new BadRequestError("Invalid email or password");
       }
 
       const isPasswordValid = await comparePasswords(password, user.password);
 
       if (!isPasswordValid) {
-        throw new Error("Invalid password");
+        throw new BadRequestError("Invalid email or password");
       }
 
       // Generate payload for JWT
@@ -76,6 +85,10 @@ export class AuthenticationServices {
       const accessToken = generateAccessToken(payload);
       const refreshToken = generateAccessToken(payload);
 
+      if (!accessToken || !refreshToken) {
+        throw new InternalServerError("Failed to generate tokens");
+      }
+
       const session = await prisma.session.create({
         data: {
           userId: user.id,
@@ -84,14 +97,22 @@ export class AuthenticationServices {
         },
       });
 
+      if (!session) {
+        throw new DatabaseError("Failed to create session");
+      }
+
       return {
         accessToken: session.accessToken,
         refreshToken: session.refreshToken,
       };
     } catch (error) {
-      if (error instanceof Error) {
-        throw Error(`Failed to login user: ${error?.message}`);
+      if (error instanceof StandardError) {
+        throw error;
       }
+
+      throw new InternalServerError(
+        "An unexpected error occurred while logging in user"
+      );
     }
   }
 
@@ -109,9 +130,13 @@ export class AuthenticationServices {
         where: { id: session.id },
       });
     } catch (error) {
-      if (error instanceof Error) {
-        throw Error(`Failed to logout user: ${error?.message}`);
+      if (error instanceof StandardError) {
+        throw error;
       }
+
+      throw new InternalServerError(
+        "An unexpected error occurred while logging out user"
+      );
     }
   }
 
@@ -154,10 +179,10 @@ export class AuthenticationServices {
       const user = await prisma.user.findUnique({
         where: { email },
       });
-  
-      return user ? true : false;
+      console.log("User found:", user);
+      return !!user; // Returns true if user exists, false otherwise
     } catch (error) {
-      throw new DatabaseError("Error while checking email existence");
+      throw error;
     }
   }
 }
