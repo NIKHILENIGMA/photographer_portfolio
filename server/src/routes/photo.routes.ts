@@ -22,10 +22,22 @@ router
 
 
 // Photo CRUD by ID
+router.patch(
+  "/:photoId/details",
+  isAuthenticated,
+  PhotoController.updatePhotoDetails
+);
+
+router.patch(
+  "/:photoId",
+  isAuthenticated,
+  upload.single("photo"),
+  PhotoController.updateImageOfPhoto
+);
+
 router
   .route("/:photoId")
   .get(PhotoController.getPhotoDetails)
-  .patch(isAuthenticated, upload.single("photo"), PhotoController.updatePhoto)
   .delete(isAuthenticated, PhotoController.deletePhoto);
 
 export default router;
