@@ -8,9 +8,9 @@ export const useRefreshToken = () => {
       const response = await AuthService.refreshToken();
       return response;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       // Handle successful login, e.g., redirect or show a success message
-      console.log('token refresh successful:', data);
+      
     },
     onError: (error) => {
       // Handle error, e.g., show an error message

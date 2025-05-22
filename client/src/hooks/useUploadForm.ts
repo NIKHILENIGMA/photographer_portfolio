@@ -1,10 +1,9 @@
-import { ChangeEvent, FormEvent, useCallback, useRef, useState } from "react";
-import { usePhotoMutation } from "./usePhotoMutation";
+import { ChangeEvent, FormEvent, useRef, useState } from "react";
+import { useAddPhotoMutation } from "./usePhotos";
 
 interface FormDetails {
   title: string;
   location?: string;
-  date?: Date | null;
   description: string;
 }
 
@@ -12,23 +11,12 @@ export const useUploadForm = () => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [preview, setPreview] = useState<string>("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const { addPhotoMutation } = usePhotoMutation();
+  const { mutateAsync: addPhotoMutation } = useAddPhotoMutation();
   const [formDetails, setFormDetails] = useState<FormDetails | null>({
     title: "",
     location: "",
-    date: null,
     description: "",
   } as FormDetails);
-
-  // const getDate = useCallback(
-  //   (date: Date) => {
-  //     setFormDetails({
-  //       ...formDetails,
-  //       date: date,
-  //     } as FormDetails);
-  //   },
-  //   [formDetails]
-  // );
 
   const handleImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -73,23 +61,42 @@ export const useUploadForm = () => {
 
     if (!formDetails) return;
 
-    const { title, location, date, description } = formDetails;
-    console.log("Form Details:", formDetails);
+    const { title, location, description } = formDetails;
 
-    if (!title || !location || !date || !description) {
+    if (!title || !location || !description) {
       alert("Please fill in all fields.");
       return;
     }
 
-    // addPhotoMutation.mutate({ file: selectedFile!, data: formDetails });
-    // setFormDetails({
-    //   title: "",
-    //   location: "",
-    //   date: null,
-    //   description: "",
-    // });
-    // setPreview("");
-    // setSelectedFile(null);
+    const response = addPhotoMutation({
+      title,
+      location,
+      description,
+      photo: selectedFile,
+    } as FormDetails);
+
+    if (response) {
+      console.log("Photo uploaded successfully:", response);
+    } else {
+      console.error("Error uploading photo");
+      alert("Error uploading photo. Please try again.");
+    }
+    // Reset form details and preview
+    setFormDetails({
+      title: "",
+      location: "",
+      description: "",
+    });
+    setPreview("");
+    setSelectedFile(null);
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
+    document.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Escape",
+      })
+    );
   };
 
   return {
@@ -97,7 +104,6 @@ export const useUploadForm = () => {
     preview,
     formDetails,
     setFormDetails,
-    getDate,
     handleImageChange,
     handleFileRemove,
     handleInputChange,

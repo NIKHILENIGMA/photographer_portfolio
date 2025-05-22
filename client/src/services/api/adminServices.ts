@@ -12,7 +12,6 @@ export const addAvatar = async (avatar: File) => {
       body: formData,
       credentials: "include",
     });
-    console.log("Avatar service response: ", response);
 
     if (!response.ok) {
       throw new Error("Failed to add avatar");
@@ -45,6 +44,25 @@ export const removeAvatar = async () => {
     console.error(error);
     throw error; // Rethrow the error to handle it in the calling function
   }
+};
+
+export const updateDetails = async ({
+  firstName,
+  lastName,
+  email,
+}: {
+  firstName: string;
+  lastName: string;
+  email: string;
+}) => {
+  await fetch(`${API_URL}/admin/profile`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ firstName, lastName, email }),
+    credentials: "include",
+  });
 };
 
 export const changePassword = async (

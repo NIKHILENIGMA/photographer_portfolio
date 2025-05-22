@@ -52,10 +52,6 @@ const router = createBrowserRouter([
         path: "photo-management",
         element: <Pages.PhotoManagementPage />,
       },
-      {
-        path: "photo-management/:photoId",
-        element: <Pages.PhotoDetailPage />,
-      },
     ],
   },
   {

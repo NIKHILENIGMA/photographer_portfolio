@@ -9,29 +9,30 @@ const imageData = [
 
 const AboutPage: React.FC = () => {
   return (
-    <section className="w-full px-6 md:px-16 py-20 bg-(--background) font-MonaSans"> 
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        {/* Left Text Content */}
-        <div>
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-6">
-            We’re changing <br /> the way people <br /> connect
-          </h2>
-          <p className="text-gray-600 text-base md:text-lg leading-relaxed">
-            At Pixel Perfect, we're passionate about capturing life's precious moments. Our team of skilled photographers brings creativity and technical expertise to every shoot. Whether it's weddings, portraits, or commercial work, we strive to tell your unique story through stunning imagery that will be treasured for generations to come.          </p>
-        </div>
+    <section className="w-full px-6 md:px-16 py-20 bg-gray-50 font-MonaSans"> 
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+      {/* Left Text Content */}
+      <div className="text-center md:text-left">
+        <h2 className="text-4xl md:text-5xl font-extrabold text-gray-800 leading-tight mb-8">
+        We’re changing <br /> the way people <br /> connect
+        </h2>
+        <p className="text-gray-700 text-base md:text-lg leading-relaxed">
+        At Clickofy Studio, we're passionate about capturing life's precious moments. Our team of skilled photographers brings creativity and technical expertise to every shoot. Whether it's weddings, portraits, or commercial work, we strive to tell your unique story through stunning imagery that will be treasured for generations to come.
+        </p>
+      </div>
 
-        {/* Right Image Grid */}
-        <div className="grid grid-cols-2 gap-6">
-          {imageData.map((src, index) => (
-            <div key={index} className="rounded-xl overflow-hidden shadow-lg">
-              <img
-                src={src}
-                alt={`People connect ${index + 1}`}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          ))}
+      {/* Right Image Grid */}
+      <div className="grid grid-cols-2 gap-8">
+        {imageData.map((src, index) => (
+        <div key={index} className="rounded-xl overflow-hidden shadow-md transform hover:scale-105 transition-transform duration-300">
+          <img
+          src={src}
+          alt={`People connect ${index + 1}`}
+          className="w-full h-full object-cover"
+          />
         </div>
+        ))}
+      </div>
       </div>
     </section>
   );

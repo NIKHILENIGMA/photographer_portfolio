@@ -11,7 +11,7 @@ const navigationLinks = [
 const Header: FC = () => {
   return (
     <header className="flex justify-between items-center px-8 py-6 bg-(--background) ">
-      <div className="text-2xl font-bold">Lype</div>
+      <div className="text-2xl font-bold">Clickofy Studio</div>
       <nav className="hidden md:flex space-x-8 text-sm font-medium text-gray-800">
         {navigationLinks.map((link) => (
           <NavLink

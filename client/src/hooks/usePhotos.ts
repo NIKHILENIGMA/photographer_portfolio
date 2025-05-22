@@ -4,10 +4,11 @@ import {
   deletePhoto,
   getPhotoById,
   getPhotos,
-  updatePhoto,
+  updatePhotoDetails,
+  updatePhotoImage,
 } from "../services/api/photoServices";
 import queryClient from "@/app/queryClient";
-import { AddFormDetails, UpdateFormDetails } from "@/types";
+import { AddFormDetails, UpdatePhoto } from "@/types";
 
 const DRAFT_STALE_TIME = 1000 * 60 * 15; // 15 minutes
 const DRAFT_GC_TIME = 1000 * 60 * 60; // 1 hour
@@ -37,12 +38,12 @@ export const usePhotoQuery = (id: string) => {
     queryFn: () => getPhotoById(id),
     staleTime: DRAFT_STALE_TIME,
     gcTime: DRAFT_GC_TIME,
-    // enabled: !!id && enabled,
-    // refetchOnWindowFocus: false,
+    enabled: !!id,
+    refetchOnWindowFocus: false,
   });
 
   return {
-    photo: photosQuery.data,
+    photo: photosQuery.data?.data,
     isLoading: photosQuery.isLoading,
     isError: photosQuery.isError,
   };
@@ -65,17 +66,30 @@ export const useAddPhotoMutation = () => {
 
 // ------------------- Mutation to update photo ------------------- //
 // This mutation is used to update an existing photo.
-export const useUpdatePhotoMutation = () => {
+export const useUpdatePhotoDetailsMutation = () => {
   return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: UpdatePhoto }) =>
+      await updatePhotoDetails(id!, data),
     mutationKey: ["updatePhoto"],
-    mutationFn: async ({ id, data }: { id: string; data: UpdateFormDetails }) =>
-      await updatePhoto(id, data),
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["photos"] });
-      queryClient.invalidateQueries({ queryKey: ["photos", variables.id] });
     },
     onError: (error) => {
-      console.error("Mutation error while updating photo to server: ", error);
+      console.error("Error updating photo:", error);
+    },
+  });
+};
+
+export const useUpdateImageMutation = () => {
+  return useMutation({
+    mutationFn: async ({id, photo}: {id: string, photo: File}) =>
+      await updatePhotoImage(id, photo),
+    mutationKey: ["updatePhotoImage"],
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["photos"] });
+    },
+    onError: (error) => {
+      console.error("Error updating photo image:", error);
     },
   });
 };
@@ -84,13 +98,13 @@ export const useUpdatePhotoMutation = () => {
 // This mutation is used to delete a photo.
 export const useDeletePhotoMutation = () => {
   return useMutation({
-    mutationKey: ["deletePhoto"],
     mutationFn: async (id: string) => await deletePhoto(id),
+    mutationKey: ["deletePhoto"],
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["photos"] });
     },
     onError: (error) => {
-      console.error("Mutation error while deleting photo from server: ", error);
+      console.error("Error deleting photo:", error);
     },
   });
 };

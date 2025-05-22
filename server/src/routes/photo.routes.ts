@@ -14,9 +14,9 @@ router.get('/', PhotoController.getPhotos)
 router.route('/add-image').post(isAuthenticated, upload.single('photo'), PhotoController.addImageToPhoto)
 
 // Photo CRUD by ID
-router.patch('/:photoId/details', isAuthenticated, PhotoController.updatePhotoDetails)
+router.route('/details/:photoId/').patch(isAuthenticated, PhotoController.updatePhotoDetails)
 
-router.patch('/:photoId', isAuthenticated, upload.single('photo'), PhotoController.updateImageOfPhoto)
+router.patch('/image/:photoId', isAuthenticated, upload.single('photo'), PhotoController.updateImageOfPhoto)
 
 router.route('/:photoId').get(PhotoController.getPhotoDetails).delete(isAuthenticated, PhotoController.deletePhoto)
 

@@ -1,10 +1,9 @@
-import { ChangeEvent, JSX, useRef, useState } from "react";
+import React, { ChangeEvent, JSX } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAuthContext } from "@/hooks/useAuthContext";
 import Container from "@/container";
 import { FaPencil } from "react-icons/fa6";
 import {
@@ -14,75 +13,56 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { addAvatar, removeAvatar } from "@/services/api/adminServices";
-import AuthService from "@/services/api/authServices";
+import ImageLoader from "@/components/Common/ImageLoader";
+import { useDashboard } from "@/hooks/useDashboard";
+import { useUpdateDetailsMutation } from "./../../hooks/useUserDetails";
+
+interface UserDetails {
+  firstName: string;
+  lastName: string;
+  email: string;
+}
 
 export default function Dashboard(): JSX.Element {
-  const { user, setUser } = useAuthContext();
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const {
+    user,
+    inputRef,
+    dashboardState,
+    handleDialogOpen,
+    handleFileChange,
+    handleFileUpload,
+    handleRemoveAvatar,
+  } = useDashboard();
 
-  if (!user) {
-    return <div>Loading...</div>; // Handle null user case
-  }
+  const { mutateAsync: updateDetailsMutation } = useUpdateDetailsMutation();
 
-  const handleDialogOpen = () => {
-    setIsOpen(true);
+  const [userDetails, setUserDetails] = React.useState<UserDetails>({
+    firstName: "",
+    lastName: "",
+    email: "",
+  });
+
+  const handleUserDetailsChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    
+    setUserDetails((prevDetails) => ({
+      ...prevDetails,
+      [name]: value,
+    }));
   };
 
-  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault();
-
-    const uploadFile: File | undefined = e.target.files?.[0];
-    if (!uploadFile) {
-      return;
-    }
-
-    setSelectedFile(uploadFile);
-  };
-
-  const handleFileUpload = async () => {
+  const handleUserDetailsFormSubmit = async (e: React.FormEvent) => {
     try {
-      if (!selectedFile) {
-        console.error("No file selected");
+      e.preventDefault();
+      if (userDetails.firstName === "" || userDetails.lastName === "") {
+        console.error("First name and last name can not be empty");
         return;
+        
       }
-      await addAvatar(selectedFile);
-      setSelectedFile(null); // Clear the file after upload
-      setIsOpen(false); // Close the dialog
-      if (inputRef.current) {
-        inputRef.current.value = ""; // Clear the file input
-      }
-
-      const updatedUser = await AuthService.getProfile(
-        AuthService.getToken() as string
-      ); // Fetch the updated user profile
-      setUser({
-        ...user,
-        avatarImage: updatedUser.data.avatarImage, // Update the user state with the new avatar
-      });
+      // Handle form submission logic here
+      await updateDetailsMutation(userDetails);
     } catch (error) {
-      console.error("Error uploading file:", error);
-    }
-  };
-
-  const handleRemoveAvatar = async () => {
-    try {
-      await removeAvatar();
-      setSelectedFile(null); // Clear the file after upload
-      setIsOpen(false); // Close the dialog
-
-      if (inputRef.current) {
-        inputRef.current.value = ""; // Clear the file input
-      }
-
-      setUser({
-        ...user,
-        avatarImage: "", // Update the user state with the new avatar
-      });
-    } catch (error) {
-      console.error("Error removing avatar:", error);
+      console.error("Error updating user details:", error);
     }
   };
 
@@ -95,34 +75,46 @@ export default function Dashboard(): JSX.Element {
             src="https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Y292ZXIlMjBpbWFnZXxlbnwwfHwwfHx8MA%3D%3D"
             alt="Cover"
             className="object-cover w-full h-full z-10 rounded-xl"
+            loading="lazy"
           />
           {/* Avatar */}
           <div className="absolute bottom-0 left-4 transform translate-y-1/2 z-50">
             <div className="absolute bottom-2 right-2.5 rounded-full z-20 w-6 h-6">
               <Button
                 variant="ghost"
-                className="rounded-full hover:none"
+                className="rounded-full hover:bg-gray-100"
                 onClick={handleDialogOpen}
+                aria-label="Edit avatar"
               >
-                <FaPencil className="" size={6} />
+                <FaPencil size={12} />
               </Button>
             </div>
-            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <Dialog
+              open={dashboardState.isOpen}
+              onOpenChange={handleDialogOpen}
+            >
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Avatar</DialogTitle>
                   <DialogDescription>Add your avatar image.</DialogDescription>
                   <div className="flex flex-col space-y-4 items-center w-full justify-center p-10">
-                    {user && user.avatarImage ? (
+                    {user && user.profilePicture ? (
                       <div className="flex flex-col items-center p-3 space-y-5">
-                        <img
-                          src={user.avatarImage}
-                          alt={user.firstName}
-                          className="w-64 h-64 rounded-full object-cover"
-                        />
+                        {dashboardState.loading ? (
+                          <ImageLoader />
+                        ) : (
+                          <div>
+                            <img
+                              src={user.profilePicture}
+                              alt={user.firstName}
+                              className="w-64 h-64 rounded-full object-cover"
+                            />
+                          </div>
+                        )}
 
                         <Button
                           variant={"destructive"}
+                          className="cursor-pointer"
                           onClick={handleRemoveAvatar}
                         >
                           Remove
@@ -144,9 +136,14 @@ export default function Dashboard(): JSX.Element {
                             className="w-64 h-64 rounded-full flex justify-center items-center cursor-pointer"
                             onClick={() => inputRef.current?.click()}
                           >
-                            {selectedFile ? (
+                            {dashboardState.loading ? (
+                              <ImageLoader />
+                            ) : dashboardState.selectedFile &&
+                              !dashboardState.loading ? (
                               <img
-                                src={URL.createObjectURL(selectedFile)}
+                                src={URL.createObjectURL(
+                                  dashboardState.selectedFile
+                                )}
                                 alt="Selected"
                                 className="w-full h-full rounded-full object-cover"
                               />
@@ -160,6 +157,10 @@ export default function Dashboard(): JSX.Element {
                           variant={"secondary"}
                           className="cursor-pointer"
                           onClick={handleFileUpload}
+                          disabled={
+                            !dashboardState.selectedFile ||
+                            dashboardState.loading
+                          }
                         >
                           Upload
                         </Button>
@@ -173,14 +174,16 @@ export default function Dashboard(): JSX.Element {
             <Avatar className="w-24 h-24 border-4 border-card shadow-lg">
               <AvatarImage
                 src={
-                  user?.avatarImage !== ""
-                    ? user?.avatarImage
-                    : "https://images.unsplash.com/photo-1552663651-2e4250e6c7c8?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHJhdyUyMHBvcnRyYWl0fGVufDB8fDB8fHww"
+                  user?.profilePicture ||
+                  "https://images.unsplash.com/photo-1552663651-2e4250e6c7c8?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHJhdyUyMHBvcnRyYWl0fGVufDB8fDB8fHww"
                 }
-                alt="Avatar"
+                alt={`${user?.firstName || "User"} avatar`}
                 className="rounded-full object-cover"
               />
-              <AvatarFallback>SS</AvatarFallback>
+              <AvatarFallback>
+                {user?.firstName?.[0]}
+                {user?.lastName?.[0]}
+              </AvatarFallback>
             </Avatar>
           </div>
         </div>
@@ -200,27 +203,46 @@ export default function Dashboard(): JSX.Element {
               <CardTitle>Change Details</CardTitle>
             </CardHeader>
             <CardContent>
-              <form className="space-y-4">
+              <form
+                className="space-y-4"
+                onSubmit={handleUserDetailsFormSubmit}
+              >
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col space-y-2.5">
-                    <Label htmlFor="first-name">First Name</Label>
+                    <Label htmlFor="firstName">First Name</Label>
                     <Input
-                      id="first-name"
                       type="text"
+                      id="firstName"
+                      name="firstName"
                       placeholder="First Name"
+                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                        handleUserDetailsChange(e)
+                      }
                     />
                   </div>
                   <div className="flex flex-col space-y-2.5">
-                    <Label htmlFor="last-name">Last Name</Label>
-                    <Input id="last-name" type="text" placeholder="Last Name" />
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input
+                      type="text"
+                      id="lastName"
+                      name="lastName"
+                      placeholder="Last Name"
+                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                        handleUserDetailsChange(e)
+                      }
+                    />
                   </div>
                 </div>
                 <div className="flex flex-col space-y-2.5">
-                  <Label htmlFor="email-address">Email Address</Label>
+                  <Label htmlFor="email">Email Address</Label>
                   <Input
-                    id="email-address"
+                    id="email"
+                    name="email"
                     type="email"
                     placeholder="Email Address"
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      handleUserDetailsChange(e)
+                    }
                   />
                 </div>
                 <Button type="submit" variant={"default"} className="w-full">

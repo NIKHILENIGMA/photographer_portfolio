@@ -16,7 +16,6 @@ export class PhotoController {
             if (!photoFile) {
                 throw new NotFoundError('Local file not found in the request')
             }
-            console.log('Photo Date: ', req.body.date)
 
             const validateData = addPhotoSchema.parse(req.body) // Validate the request body
 
@@ -38,21 +37,17 @@ export class PhotoController {
 
     // --------------------------------------  UPDATE OPERATIONS ---------------------------------------------
     static async updatePhotoDetails(req: CustomRequest, res: Response) {
-        try {
-            const photoId: string = req.params.photoId
+        const photoId: string = req.params.photoId
 
-            const validateData = updatePhotoSchema.parse(req.body)
-
-            const successMessgae = await PhotoService.updatePhotoDetails(photoId, validateData)
-
-            ApiResponse(req, res, 200, successMessgae, {})
-        } catch (error) {
-            if (error instanceof StandardError) {
-                throw error
-            }
-
-            throw new InternalServerError('An unexpected error occurred while updating photo')
+        const validateData = updatePhotoSchema.parse(req.body)
+        if (!validateData) {
+            throw new NotFoundError('No photo details found')
+            
         }
+
+        const successMessgae = await PhotoService.updatePhotoDetails(photoId, validateData)
+
+        ApiResponse(req, res, 200, successMessgae, {})
     }
 
     static async updateImageOfPhoto(req: CustomRequest, res: Response) {

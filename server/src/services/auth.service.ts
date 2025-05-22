@@ -58,13 +58,14 @@ export class AuthenticationServices {
             if (!user) {
                 throw new BadRequestError('Invalid email or password')
             }
-
+            
             const isPasswordValid = await comparePasswords(password, user.password)
 
             if (!isPasswordValid) {
                 throw new BadRequestError('Invalid email or password')
             }
 
+            
             // Generate payload for JWT
             const payload = generatePayload(user.id)
 
@@ -162,7 +163,6 @@ export class AuthenticationServices {
             const user = await prisma.user.findUnique({
                 where: { email }
             })
-            console.log('User found:', user)
             return !!user // Returns true if user exists, false otherwise
         } catch (error) {
             throw error

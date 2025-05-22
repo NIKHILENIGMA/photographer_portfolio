@@ -16,6 +16,7 @@ export const useLogin = () => {
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.currentTarget;
+    
     setLoginForm((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -35,8 +36,10 @@ export const useLogin = () => {
     // Call the login mutation
     const token = await loginMutation.mutateAsync(loginPayload);
 
+    // Store the token in memory 
     setToken(token);
 
+    // After successful login, redirect to the dashboard
     navigate("/admin/dashboard/", { replace: true });
   };
 
@@ -44,7 +47,7 @@ export const useLogin = () => {
     mutationKey: ["login"],
     mutationFn: async (data: LoginPayload) => {
       const response = await AuthService.login(data);
-      return response.data.accessToken; // Adjust based on your API response structure
+      return response.data.access_token; // Adjust based on your API response structure
     },
     onError: (error) => {
       // Handle error, e.g., show an error message

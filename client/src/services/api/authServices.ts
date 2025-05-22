@@ -7,7 +7,9 @@ const API_URL =
 interface GetUserResponse {
   success: boolean;
   message: string;
-  data: User;
+  data: {
+    user: User;
+  };
   statusCode: number;
 }
 
@@ -56,7 +58,7 @@ class AuthService {
 
       const data = await response.json();
 
-      this.setToken(data.data.accessToken);
+      this.setToken(data.data.access_token);
       return data;
     } catch (error) {
       console.error("Login error:", error);
@@ -138,8 +140,7 @@ class AuthService {
         },
         credentials: "include",
       });
-      console.log('response', response);
-      
+
       if (!response.ok) {
         throw new Error("Failed to logout");
       }

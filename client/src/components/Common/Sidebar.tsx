@@ -22,8 +22,7 @@ const Sidebar: FC = () => {
   ];
 
   const handleLogout = async () => {
-    // Handle logout logic here
-    console.log("Logout clicked");
+
     await AuthService.logout();
     navigate("/login");
   };
@@ -32,7 +31,7 @@ const Sidebar: FC = () => {
     <aside
       className={`sticky top-0 left-0 min-h-screen bg-muted border-[1px] border-r border-border text-muted-foreground transition-all duration-300 z-50 ${
         collapsed ? "w-16" : "w-64"
-      } flex flex-col font-MonaSans`}
+      } flex flex-col font-Roboto`}
     >
       <div className="flex items-center justify-between px-4 py-4 border-b border-border">
         <div
@@ -40,7 +39,7 @@ const Sidebar: FC = () => {
             collapsed ? "hidden" : "block"
           }`}
         >
-          MyCompany
+          Clickofy Studio
         </div>
         <button
           onClick={() => setCollapsed(!collapsed)}

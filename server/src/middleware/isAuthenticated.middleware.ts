@@ -47,7 +47,10 @@ export const isAuthenticated = async (req: CustomRequest, res: Response, next: N
         if (error instanceof StandardError) {
             throw error // Re-throw known errors
         }
+        if (error instanceof Error) {
+            throw new UnauthorizedError(`An unexpected error occurred: ${error.message}`) // Handle unknown errors
+        }
 
-        throw new UnauthorizedError('Unauthorized access') // Handle unknown errors
+        throw new UnauthorizedError('Unauthorized access ') // Handle unknown errors
     }
 }

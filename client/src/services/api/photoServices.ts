@@ -1,4 +1,4 @@
-import { AddFormDetails, UpdateFormDetails } from "@/types";
+import { AddFormDetails } from "@/types";
 
 const API_URL: string =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api/v1";
@@ -10,13 +10,12 @@ export const addPhoto = async (data: AddFormDetails) => {
     formData.append("title", data.title);
     formData.append("description", data.description);
     formData.append("location", data.location || "");
-    formData.append("date", data.date ? data.date.toString() : "");
 
     const response = await fetch(`${API_URL}/photos/add-image/`, {
       method: "POST",
       body: formData,
       credentials: "include", // Include credentials for cross-origin requests
-      // DO NOT set Content-Type manually when using FormData
+      
     });
 
     if (!response.ok) {
@@ -31,27 +30,25 @@ export const addPhoto = async (data: AddFormDetails) => {
   }
 };
 
-export const updatePhoto = async (
+export type UpdatePhotoDetailsInput = {
+  title?: string;
+  description?: string;
+  location?: string;
+  date?: Date | string;
+};
+
+export const updatePhotoDetails = async (
   id: string,
-  photoDetails: UpdateFormDetails
+  photoDetails: UpdatePhotoDetailsInput
 ) => {
-  const formData = new FormData();
-  formData.append("title", photoDetails.title!);
-  formData.append("description", photoDetails.description!);
-  formData.append("location", photoDetails.location || "");
-  formData.append(
-    "date",
-    photoDetails.date ? photoDetails.date.toString() : ""
-  );
-  if (photoDetails.photo) {
-    formData.append("photo", photoDetails.photo);
-  }
   try {
-    const response = await fetch(`${API_URL}/photos/${id}`, {
+    const response = await fetch(`${API_URL}/photos/details/${id}/`, {
       method: "PATCH",
-      body: formData,
+      body: JSON.stringify(photoDetails),
       credentials: "include", // Include credentials for cross-origin requests
-      // DO NOT set Content-Type manually when using FormData
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
 
     if (!response.ok) {
@@ -62,6 +59,28 @@ export const updatePhoto = async (
     return data;
   } catch (error) {
     console.error("Error updating photo:", error);
+    throw error; // Rethrow the error to handle it in the calling function
+  }
+};
+
+export const updatePhotoImage = async (id: string, photo: File) => {
+  const formData = new FormData();
+  formData.append("photo", photo);
+
+  try {
+    const response = await fetch(`${API_URL}/photos/image/${id}`, {
+      method: "PATCH",
+      body: formData,
+      credentials: "include", // Include credentials for cross-origin requests
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to update photo image");
+    }
+
+    await response.json();
+  } catch (error) {
+    console.error("Error updating photo image:", error);
     throw error; // Rethrow the error to handle it in the calling function
   }
 };

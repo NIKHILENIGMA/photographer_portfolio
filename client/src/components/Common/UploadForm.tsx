@@ -123,20 +123,16 @@ const UploadForm: FC = () => {
                   Enter the location where the image was taken.
                 </span>
               </div>
-              <div className="flex flex-col space-y-2">
-                <Label htmlFor="description" className=" font-medium mb-2">
-                  Date
-                </Label>
-                <span className="text-gray-500 text-xs px-1">
-                  Select the date when the image was taken.
-                </span>
-              </div>
-
               <div className="grid w-full gap-1.5">
                 <Label htmlFor="message-2">Your Message</Label>
                 <Textarea
                   placeholder="Type your message here."
                   id="message-2"
+                  name="description"
+                  value={formDetails?.description || ""}
+                  onChange={handleInputChange}
+                  className="resize-none h-32"
+                  required
                 />
                 <p className="text-xs text-muted-foreground">
                   Write a brief description of the image.

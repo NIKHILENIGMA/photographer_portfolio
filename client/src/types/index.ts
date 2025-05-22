@@ -3,9 +3,17 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
-  avatarImage: string;
-  createdAt: string;
+  profilePicture: string;
+  createdAt: object;
 }
+// firstName: "sameer ";
+// avatarImage: "";
+// cloudinaryPublicId: "";
+// createdAt: {
+// }
+// email: "sameerrocks@gmail.com";
+// id: "a0828802-0349-4953-9d7f-4daaa1c02cff";
+// lastName: "Matonkar";
 
 export interface AuthContextType {
   user: User | null; // Allow user to be null
@@ -59,7 +67,6 @@ export interface AddFormDetails {
 }
 
 export interface UpdateFormDetails {
-  photo?: File | null;
   title?: string;
   description?: string;
   location?: string;
